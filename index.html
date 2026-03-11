@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phuket Market Intelligence Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #0D0D0D;
+  --bg-panel: #141414;
+  --bg-row: #1A1A1A;
+  --bg-hover: #202020;
+  --amber-main: #FF8500;
+  --amber-dim: #CC6A00;
+  --amber-faint: rgba(255,133,0,0.08);
+  --amber-border: rgba(255,133,0,0.22);
+  --amber: #FF8500;
+  --amber-faint2: rgba(255,133,0,0.12);
+  --red: #FF3B30;
+  --red-faint: rgba(255,59,48,0.1);
+  --blue: #4D9FBF;
+  --blue-faint: rgba(77,159,191,0.12);
+  --white: #D8D8D8;
+  --muted: #505050;
+  --muted2: #363636;
+  --border: #1E1E1E;
+  --border-bright: #2A2A2A;
+  --seg-low: #4D9FBF;
+  --seg-mid: #FF8500;
+  --seg-high: #E06000;
+  --seg-lux: #9B5FBF;
+  /* Legacy aliases for JS that references old vars */
+  --navy: #0A0A0A;
+  --navy-mid: #111111;
+  --gold: #FF8500;
+  --gold-light: #CC6A00;
+  --cream: #E8E8E8;
+  --danger: #FF3B30;
+  --success: #FF8500;
+  --warn: #E06000;
+  --border-gold: rgba(255,133,0,0.25);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--bg);
+  font-family: 'IBM Plex Mono', 'Courier New', monospace;
+  color: var(--white);
+  min-height: 100vh;
+  font-size: 12px;
+}
+
+/* ── TICKER BAR ── */
+.ticker-bar {
+  background: #000;
+  border-bottom: 1px solid var(--green-border);
+  padding: 4px 0;
+  overflow: hidden;
+  position: relative;
+  height: 24px;
+}
+.ticker-track {
+  display: flex;
+  gap: 0;
+  animation: ticker-scroll 40s linear infinite;
+  white-space: nowrap;
+  position: absolute;
+  top: 4px;
+}
+.ticker-item {
+  font-size: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  padding: 0 28px 0 0;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+.ticker-item .tk-name { color: var(--green); font-weight: 600; }
+.ticker-item .tk-val { color: var(--white); }
+.ticker-item .tk-up { color: var(--green); }
+.ticker-item .tk-dn { color: var(--red); }
+.ticker-item .tk-sep { color: var(--muted2); margin: 0 6px; }
+@keyframes ticker-scroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+/* ── MODE BAR ── */
+.mode-bar {
+  background: #0D0D0D;
+  border-bottom: 1px solid var(--border-bright);
+  padding: 0 24px;
+  display: flex; align-items: center; gap: 0;
+}
+.mode-btn {
+  padding: 8px 20px; font-size: 10px; font-weight: 600;
+  font-family: 'IBM Plex Mono', monospace;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--muted); cursor: pointer; border: none; background: none;
+  border-bottom: 2px solid transparent; transition: all 0.15s;
+}
+.mode-btn.active { color: var(--green); border-bottom-color: var(--green); }
+.mode-btn:hover:not(.active) { color: var(--white); }
+.mode-label { font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: #333; margin-right: 16px; letter-spacing: 0.15em; text-transform: uppercase; }
+.mode-bar-right { margin-left: auto; font-size: 10px; font-family: 'IBM Plex Mono', monospace; color: #333; letter-spacing: 0.06em; }
+.mode-bar-right .live-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--green); margin-right: 6px; animation: blink 1.2s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+/* ── TAB NAV ── */
+.nav {
+  position: sticky; top: 0; z-index: 100;
+  background: #0D0D0D;
+  border-bottom: 1px solid var(--border-bright);
+  padding: 0 24px;
+  display: flex; align-items: center; gap: 0;
+}
+.nav-brand {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px; font-weight: 700; color: var(--green);
+  padding: 14px 0; margin-right: 32px; letter-spacing: 0.08em;
+  white-space: nowrap;
+  text-shadow: 0 0 20px rgba(255,133,0,0.4);
+}
+.nav-tabs { display: flex; gap: 0; flex: 1; overflow-x: auto; }
+.nav-tab {
+  padding: 14px 16px; font-size: 10px; font-weight: 600;
+  font-family: 'IBM Plex Mono', monospace;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--muted); cursor: pointer; border: none; background: none;
+  border-bottom: 2px solid transparent; transition: all 0.15s; white-space: nowrap;
+}
+.nav-tab:hover { color: var(--white); }
+.nav-tab.active { color: var(--green); border-bottom-color: var(--green); }
+.nav-meta {
+  font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #444;
+  padding: 4px 10px; border: 1px solid var(--border); white-space: nowrap;
+  letter-spacing: 0.04em;
+}
+
+/* ── PANELS ── */
+.panel { display: none; }
+.panel.active { display: block; }
+.mode-panel { display: none; } .mode-panel.active { display: block; }
+
+.container { max-width: 1320px; margin: 0 auto; padding: 24px 24px; }
+
+/* ── TYPOGRAPHY ── */
+.section-label { font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--green); opacity: 0.6; margin-bottom: 6px; }
+.section-title { font-family: 'IBM Plex Mono', monospace; font-size: 18px; font-weight: 700; color: var(--white); margin-bottom: 4px; letter-spacing: 0.03em; }
+.section-sub { font-size: 11px; color: var(--muted); margin-bottom: 20px; line-height: 1.6; font-family: 'IBM Plex Mono', monospace; }
+.divider { height: 1px; background: var(--border-bright); margin: 24px 0; }
+
+/* ── KPI GRID ── */
+.kpi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 2px; margin-bottom: 2px; }
+.kpi-grid-5 { grid-template-columns: repeat(5,1fr); }
+.kpi-card {
+  background: var(--bg-panel); border: 1px solid var(--border);
+  padding: 14px 16px; position: relative; overflow: hidden;
+  border-radius: 0;
+}
+.kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: var(--green); }
+.kpi-card.red::before { background: var(--red); }
+.kpi-card.green::before { background: var(--green); }
+.kpi-card.warn::before { background: var(--amber); }
+.kpi-card.purple::before { background: #8B5FB0; }
+.kpi-card.blue::before { background: var(--blue); }
+.kpi-label { font-size: 9px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #444; margin-bottom: 8px; font-family: 'IBM Plex Mono', monospace; }
+.kpi-value { font-family: 'IBM Plex Mono', monospace; font-size: 26px; font-weight: 700; color: var(--white); line-height: 1; }
+.kpi-unit { font-size: 11px; color: #444; margin-left: 3px; }
+.kpi-delta { margin-top: 6px; font-size: 10px; font-family: 'IBM Plex Mono', monospace; }
+.kpi-delta.up { color: var(--green); } .kpi-delta.down { color: var(--red); } .kpi-delta.flat { color: var(--muted); }
+
+/* ── CHART CARDS ── */
+.chart-row { display: grid; gap: 2px; margin-bottom: 2px; }
+.chart-row.cols-2 { grid-template-columns: 1fr 1fr; }
+.chart-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.chart-row.cols-12 { grid-template-columns: 1fr 2fr; }
+.chart-row.cols-21 { grid-template-columns: 2fr 1fr; }
+.chart-row.cols-13 { grid-template-columns: 1fr 3fr; }
+.chart-card { background: var(--bg-panel); border: 1px solid var(--border); padding: 16px 18px; border-radius: 0; }
+.chart-card-title { font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green); margin-bottom: 2px; font-family: 'IBM Plex Mono', monospace; }
+.chart-card-sub { font-size: 9px; color: #444; margin-bottom: 14px; line-height: 1.5; font-family: 'IBM Plex Mono', monospace; }
+
+/* ── TABLES ── */
+.data-table { width: 100%; border-collapse: collapse; font-size: 11px; font-family: 'IBM Plex Mono', monospace; }
+.data-table th { text-align: left; padding: 8px 10px; font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #444; border-bottom: 1px solid var(--border-bright); background: #0D0D0D; }
+.data-table td { padding: 9px 10px; border-bottom: 1px solid var(--border); color: var(--white); }
+.data-table tr:hover td { background: var(--bg-row); }
+.data-table .sub { font-size: 9px; color: var(--muted); }
+
+/* ── BADGES ── */
+.badge { display: inline-block; padding: 1px 6px; font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; font-family: 'IBM Plex Mono', monospace; border-radius: 0; }
+.badge-sell { background: rgba(255,133,0,0.12); color: var(--green); border: 1px solid var(--green-border); }
+.badge-pre  { background: rgba(255,140,0,0.12); color: var(--amber); border: 1px solid rgba(255,140,0,0.35); }
+.badge-done { background: rgba(85,85,85,0.2); color: #555; border: 1px solid #333; }
+/* Segment badges */
+.seg { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; font-family: 'IBM Plex Mono', monospace; border-radius: 0; }
+.seg-low  { background: rgba(91,163,201,0.1); color: #5BA3C9; border: 1px solid rgba(91,163,201,0.3); }
+.seg-mid  { background: rgba(255,133,0,0.1); color: var(--green); border: 1px solid var(--green-border); }
+.seg-high { background: rgba(255,140,0,0.1); color: var(--amber); border: 1px solid rgba(255,140,0,0.3); }
+.seg-lux  { background: rgba(139,95,176,0.1); color: #8B5FB0; border: 1px solid rgba(139,95,176,0.3); }
+.seg-dot  { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+.seg-low .seg-dot  { background: #5BA3C9; }
+.seg-mid .seg-dot  { background: var(--green); }
+.seg-high .seg-dot { background: var(--amber); }
+.seg-lux .seg-dot  { background: #8B5FB0; }
+
+/* ── RULE BOX ── */
+.rule-box {
+  background: rgba(255,133,0,0.04); border: 1px solid var(--green-border);
+  border-left: 2px solid var(--green); padding: 12px 16px;
+  margin: 14px 0; font-size: 11px; color: var(--white); line-height: 1.8;
+  font-family: 'IBM Plex Mono', monospace; border-radius: 0;
+}
+.rule-box strong { color: var(--green); }
+.rule-box code { font-family: 'IBM Plex Mono', monospace; font-size: 10px; background: rgba(255,133,0,0.06); padding: 1px 5px; color: var(--green); }
+
+/* ── SEGMENT BREAKDOWN BAR ── */
+.seg-bar-wrap { display: flex; height: 16px; overflow: hidden; gap: 1px; margin: 8px 0; }
+.seg-bar-seg { display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 700; color: rgba(0,0,0,0.8); transition: width 0.4s; min-width: 0; overflow: hidden; white-space: nowrap; font-family: 'IBM Plex Mono', monospace; }
+.seg-bar-low  { background: #5BA3C9; }
+.seg-bar-mid  { background: var(--green); }
+.seg-bar-high { background: var(--amber); }
+.seg-bar-lux  { background: #8B5FB0; }
+.seg-legend { display: flex; gap: 14px; margin-top: 6px; flex-wrap: wrap; }
+.seg-legend-item { display: flex; align-items: center; gap: 5px; font-size: 9px; color: var(--muted); font-family: 'IBM Plex Mono', monospace; }
+.seg-legend-dot { width: 7px; height: 7px; border-radius: 50%; }
+
+/* ── UNIT MIX BARS ── */
+.unit-mix-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+.unit-mix-label { font-size: 10px; color: var(--white); width: 80px; flex-shrink: 0; font-family: 'IBM Plex Mono', monospace; }
+.unit-mix-bar-bg { flex: 1; height: 6px; background: var(--border); }
+.unit-mix-bar-fill { height: 100%; background: var(--green); }
+.unit-mix-pct { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--green); width: 34px; text-align: right; flex-shrink: 0; }
+.unit-mix-count { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); width: 40px; text-align: right; flex-shrink: 0; }
+
+/* ── VELOCITY CARD ── */
+.vel-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 2px; margin-bottom: 14px; }
+.vel-card { background: var(--bg-panel); border: 1px solid var(--border); padding: 12px 14px; }
+.vel-seg { font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; font-family: 'IBM Plex Mono', monospace; }
+.vel-seg.low  { color: #5BA3C9; } .vel-seg.mid { color: var(--green); } .vel-seg.high { color: var(--amber); } .vel-seg.lux { color: #8B5FB0; }
+.vel-num { font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 700; color: var(--white); line-height: 1; }
+.vel-unit { font-size: 10px; color: var(--muted); margin-top: 4px; font-family: 'IBM Plex Mono', monospace; }
+.vel-delta { font-family: 'IBM Plex Mono', monospace; font-size: 9px; margin-top: 5px; }
+
+/* ── ABSORPTION BAR ── */
+.abs-bar-wrap { display: flex; align-items: center; gap: 8px; }
+.abs-bar-bg { flex: 1; height: 4px; background: var(--border); }
+.abs-bar-fill { height: 100%; background: var(--green); }
+.abs-pct { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--green); width: 34px; text-align: right; flex-shrink: 0; }
+
+/* ── ANOMALY / SIGNAL ── */
+.anomaly-list { display: flex; flex-direction: column; gap: 2px; }
+.anomaly-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 14px; border: 1px solid; font-family: 'IBM Plex Mono', monospace; }
+.anomaly-item.warn  { background: rgba(255,140,0,0.06); border-color: rgba(255,140,0,0.3); }
+.anomaly-item.danger { background: rgba(255,59,48,0.06); border-color: rgba(255,59,48,0.3); }
+.anomaly-item.good  { background: rgba(255,133,0,0.05); border-color: var(--green-border); }
+.anomaly-icon { font-size: 12px; flex-shrink: 0; margin-top: 1px; }
+.anomaly-text { font-size: 11px; line-height: 1.7; color: var(--white); }
+.anomaly-text strong { display: block; font-size: 11px; margin-bottom: 2px; font-weight: 700; }
+.anomaly-text.warn strong { color: var(--amber); }
+.anomaly-text.danger strong { color: var(--red); }
+.anomaly-text.good strong { color: var(--green); }
+
+/* ── JSON BLOCK ── */
+.json-block { background: #000; border: 1px solid var(--border-bright); padding: 20px 24px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; line-height: 1.9; overflow-x: auto; white-space: pre; }
+.j-key { color: #5BA3C9; } .j-str { color: var(--green); } .j-num { color: var(--amber); } .j-bool { color: #8B5FB0; } .j-comment { color: #333; font-style: italic; } .j-type { color: var(--green); font-weight: 600; }
+
+/* ── MISC ── */
+.mono { font-family: 'IBM Plex Mono', monospace; }
+.text-up { color: var(--green); } .text-down { color: var(--red); } .text-muted { color: var(--muted); }
+.small { font-size: 10px; }
+.market-share-pill { font-size: 9px; color: var(--muted); font-family: 'IBM Plex Mono', monospace; background: var(--bg-row); padding: 2px 6px; display: inline-block; margin-top: 3px; border: 1px solid var(--border); }
+
+/* ── DROPDOWN (Passport) ── */
+select {
+  background: var(--bg-panel); border: 1px solid var(--border-bright); color: var(--white);
+  font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 6px 10px;
+  outline: none; cursor: pointer; border-radius: 0; appearance: none;
+  -webkit-appearance: none;
+}
+select:focus { border-color: var(--green); }
+/* ── QUOTE BAR (Bloomberg-style top strip) ── */
+.quote-bar {
+  background: #0A0A0A;
+  border-bottom: 1px solid #1E1E1E;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  height: 26px;
+  overflow: hidden;
+}
+.quote-item {
+  display: flex; align-items: center; gap: 7px;
+  padding: 0 14px; border-right: 1px solid #1E1E1E;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; white-space: nowrap; height: 100%;
+}
+.quote-item:first-child { padding-left: 0; }
+.q-name { color: #FF8500; font-weight: 600; letter-spacing: 0.04em; }
+.q-val  { color: #D8D8D8; }
+.q-up   { color: #5BA3C9; }
+.q-dn   { color: #FF3B30; }
+.q-flat { color: #505050; }
+.quote-bar-right {
+  margin-left: auto; font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px; color: #303030; letter-spacing: 0.08em;
+}
+</style>
+</head>
+<body>
+
+<!-- QUOTE BAR -->
+<div class="quote-bar">
+  <div class="quote-item"><span class="q-name">CONDO·PSM</span><span class="q-val">148,200</span><span class="q-up">▲+2.1%</span></div>
+  <div class="quote-item"><span class="q-name">BANGTAO·MID</span><span class="q-val">112,000</span><span class="q-up">▲+4.3%</span></div>
+  <div class="quote-item"><span class="q-name">RAWAI·LOW</span><span class="q-val">68,000</span><span class="q-up">▲+0.5%</span></div>
+  <div class="quote-item"><span class="q-name">KAMALA·LUX</span><span class="q-val">210,000</span><span class="q-dn">▼−0.4%</span></div>
+  <div class="quote-item"><span class="q-name">ABSORPTION</span><span class="q-val">3.8%/mo</span><span class="q-flat">→</span></div>
+  <div class="quote-item"><span class="q-name">PROJECTS</span><span class="q-val">317</span><span class="q-up">▲+4</span></div>
+  <div class="quote-item"><span class="q-name">VILLA·HIGH</span><span class="q-val">108,000</span><span class="q-up">▲+3.1%</span></div>
+  <div class="quote-item"><span class="q-name">DQS·AVG</span><span class="q-val">78/100</span><span class="q-up">▲+2</span></div>
+  <div class="quote-bar-right">MAKUHA INTELLIGENCE · WK10 2026 · PHUKET OFF-PLAN</div>
+</div>
+
+<!-- MODE BAR -->
+<div class="mode-bar">
+  <span class="mode-label">VIEW:</span>
+  <button class="mode-btn active" onclick="switchMode('weekly')">[WEEKLY REPORT]</button>
+  <button class="mode-btn" onclick="switchMode('platform')">[PLATFORM DASH]</button>
+  <button class="mode-btn" onclick="switchMode('passport')">[PROJECT PASSPORT]</button>
+  <div class="mode-bar-right">2026-03-11 07:04 ICT</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ WEEKLY REPORT MODE -->
+<div class="mode-panel active" id="mode-weekly">
+  <nav class="nav">
+    <div class="nav-brand">MAKUHA</div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="showWeekly('overview')">① Market Overview</button>
+      <button class="nav-tab" onclick="showWeekly('segments')">② Segmentation</button>
+      <button class="nav-tab" onclick="showWeekly('prices')">③ Price Trends</button>
+      <button class="nav-tab" onclick="showWeekly('velocity')">④ Sales Velocity</button>
+      <button class="nav-tab" onclick="showWeekly('projects')">⑤ Projects</button>
+      <button class="nav-tab" onclick="showWeekly('anomalies')">⑥ Signals</button>
+      <button class="nav-tab" onclick="showWeekly('schema')">⑦ Data Schema</button>
+    </div>
+    <div class="nav-meta">Week 10 · Mar 03–10, 2026</div>
+  </nav>
+
+  <!-- W1: OVERVIEW -->
+  <div class="panel active" id="w-overview">
+  <div class="container">
+    <div class="section-label">Section 1 — Executive Summary</div>
+    <div class="section-title">Market Overview: Week 10</div>
+    <div class="section-sub">7-day snapshot · March 3–10, 2026 · Phuket off-plan segment · all product types</div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card"><div class="kpi-label">Total Projects</div><div class="kpi-value">317</div><div class="kpi-delta up">▲ +4 this week</div></div>
+      <div class="kpi-card green"><div class="kpi-label">Avg ฿/sqm · Condo</div><div class="kpi-value">148<span class="kpi-unit">k ฿</span></div><div class="kpi-delta up">▲ +2.1% vs last week</div></div>
+      <div class="kpi-card warn"><div class="kpi-label">Avg Absorption Rate</div><div class="kpi-value">3.8<span class="kpi-unit">%/mo</span></div><div class="kpi-delta flat">→ unchanged</div></div>
+      <div class="kpi-card red"><div class="kpi-label">Projects w/o Price >30d</div><div class="kpi-value">23</div><div class="kpi-delta down">▲ +3 require outreach</div></div>
+    </div>
+
+    <!-- Segment summary KPIs -->
+    <div class="kpi-grid kpi-grid-5" style="margin-bottom:28px">
+      <div class="kpi-card blue"><div class="kpi-label">Low · Condo &lt;8M ฿</div><div class="kpi-value">84<span class="kpi-unit">proj</span></div><div class="kpi-delta flat">26% of market</div></div>
+      <div class="kpi-card green"><div class="kpi-label">Mid · Condo 8–15M ฿</div><div class="kpi-value">112<span class="kpi-unit">proj</span></div><div class="kpi-delta up">35% · largest seg</div></div>
+      <div class="kpi-card"><div class="kpi-label">High · Condo 15–20M ฿</div><div class="kpi-value">67<span class="kpi-unit">proj</span></div><div class="kpi-delta flat">21% of market</div></div>
+      <div class="kpi-card purple"><div class="kpi-label">Luxury · Condo 20M+ ฿</div><div class="kpi-value">38<span class="kpi-unit">proj</span></div><div class="kpi-delta up">▲ +2 this week</div></div>
+      <div class="kpi-card warn"><div class="kpi-label">Villas (all segments)</div><div class="kpi-value">16<span class="kpi-unit">proj</span></div><div class="kpi-delta flat">5% of market</div></div>
+    </div>
+
+    <div class="chart-row cols-12">
+      <div class="chart-card">
+        <div class="chart-card-title">Market Structure by Type</div>
+        <div class="chart-card-sub">Projects by product type</div>
+        <canvas id="typeDonut" style="max-height:180px"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-title">New Projects Added — Last 8 Weeks</div>
+        <div class="chart-card-sub">By product type (stacked)</div>
+        <canvas id="newProjectsChart" style="max-height:180px"></canvas>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="section-label">Platform Architecture — Three Modes</div>
+    <div style="margin:12px 0"></div>
+    <table class="data-table" style="margin-bottom:28px">
+      <thead><tr><th>Mode</th><th>Purpose</th><th>Tabs / Navigation</th><th>Audience</th></tr></thead>
+      <tbody>
+        <tr><td><strong>📋 Weekly Report</strong></td><td>7-tab weekly market snapshot. Market Overview · Segmentation · Price Trends · Sales Velocity · Projects · Signals · Data Schema</td><td>① – ⑦ tabs in nav bar</td><td>Analyst · client · team</td></tr>
+        <tr><td><strong>📊 Platform Dashboard</strong></td><td>Aggregated live analytics across all 300+ projects. Always current, not time-boxed.</td><td>① Market · ② Segments · ③ Unit Mix · ④ Velocity · ⑤ Financials</td><td>Internal analytics</td></tr>
+        <tr><td><strong>🗂 Project Passport</strong></td><td>Full per-project intelligence card. Filter by Type → select Project → renders Block A/B/C, charts, AI insight, unit table, DQS.</td><td>Type dropdown → Project dropdown → dynamic render</td><td>Sales · developer · investor</td></tr>
+      </tbody>
+    </table>
+
+    <div class="divider"></div>
+    <div class="section-label">Key Signals This Week</div>
+    <div style="margin:12px 0"></div>
+    <div class="anomaly-list">
+      <div class="anomaly-item good"><div class="anomaly-icon">📈</div><div class="anomaly-text good"><strong>Bangtao Mid-segment Condo: +4.3% ฿/sqm this week</strong>Origin Plug &amp; Play and Mono both raised prices. Possible Phase 2 cycle trigger.</div></div>
+      <div class="anomaly-item warn"><div class="anomaly-icon">⚡</div><div class="anomaly-text warn"><strong>Rawai: 3 new projects — 2.5× above 8-week average</strong>2 of 3 are untracked developers. Segment classification pending (no price lists yet).</div></div>
+      <div class="anomaly-item danger"><div class="anomaly-icon">🔴</div><div class="anomaly-text danger"><strong>Luxury segment: Absorption rate dropped to 1.2%/mo (-0.4% vs last week)</strong>Title Kamala Sea unsold inventory at 70%. Lowest velocity in 12 weeks.</div></div>
+    </div>
+  </div>
+  </div>
+
+  <!-- W2: SEGMENTATION -->
+  <div class="panel" id="w-segments">
+  <div class="container">
+    <div class="section-label">Section 2 — Segmentation</div>
+    <div class="section-title">Market Segments: Low / Mid / High / Luxury</div>
+    <div class="section-sub">Segment assigned by 51% rule · Condo and Villa thresholds differ · updated weekly from price snapshots</div>
+
+    <div class="rule-box">
+      <strong>51% Rule — Segment Assignment Logic</strong><br>
+      A project is classified into a segment when <strong>≥51% of its total units</strong> fall within that price band.<br>
+      If no single band reaches 51%, the project is tagged <code>mixed</code> and shown in all applicable segments with a weight.<br><br>
+      <strong>Condo thresholds:</strong> Low &lt;8M ฿ · Mid 8–15M ฿ · High 15–20M ฿ · Luxury 20M+ ฿<br>
+      <strong>Villa thresholds:</strong> Low &lt;15M ฿ · Mid 15–35M ฿ · High 35–90M ฿ · Luxury 90M+ ฿<br>
+      <strong>Source field:</strong> <code>price_snapshots.units[].price_thb</code> — count per band / units_total
+    </div>
+
+    <div class="chart-row cols-2">
+      <div class="chart-card">
+        <div class="chart-card-title">Condo — Segment Distribution</div>
+        <div class="chart-card-sub">Projects by segment · current week</div>
+        <canvas id="condoSegDonut" style="max-height:200px"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-title">Villa — Segment Distribution</div>
+        <div class="chart-card-sub">Projects by segment · current week</div>
+        <canvas id="villaSegDonut" style="max-height:200px"></canvas>
+      </div>
+    </div>
+
+    <!-- Segment breakdown bar per district -->
+    <div class="chart-card" style="margin-bottom:18px">
+      <div class="chart-card-title">Segment Mix by District — Condo</div>
+      <div class="chart-card-sub">Share of Low / Mid / High / Luxury projects per district</div>
+      <canvas id="segDistrictBar" style="max-height:220px"></canvas>
+    </div>
+
+    <!-- Per-segment KPI table -->
+    <div class="section-label">Segment Snapshot — Condo</div>
+    <div style="margin:14px 0"></div>
+    <table class="data-table">
+      <thead><tr><th>Segment</th><th>Threshold</th><th>Projects</th><th>Total Units</th><th>Median ฿/sqm</th><th>Absorption/mo</th><th>Avg Unit Price</th><th>฿/sqm Δ WoW</th></tr></thead>
+      <tbody>
+        <tr><td><span class="seg seg-low"><span class="seg-dot"></span>Low</span></td><td class="mono small">&lt;8M ฿</td><td class="mono">84</td><td class="mono">9,840</td><td class="mono">72,000</td><td class="mono text-up">5.8%</td><td class="mono">5.4M ฿</td><td class="mono text-up">+1.2%</td></tr>
+        <tr><td><span class="seg seg-mid"><span class="seg-dot"></span>Mid</span></td><td class="mono small">8–15M ฿</td><td class="mono">112</td><td class="mono">14,320</td><td class="mono">112,000</td><td class="mono text-up">4.1%</td><td class="mono">11.2M ฿</td><td class="mono text-up">+2.3%</td></tr>
+        <tr><td><span class="seg seg-high"><span class="seg-dot"></span>High</span></td><td class="mono small">15–20M ฿</td><td class="mono">67</td><td class="mono">5,360</td><td class="mono">148,000</td><td class="mono">3.2%</td><td class="mono">17.4M ฿</td><td class="mono text-up">+2.1%</td></tr>
+        <tr><td><span class="seg seg-lux"><span class="seg-dot"></span>Luxury</span></td><td class="mono small">20M+ ฿</td><td class="mono">38</td><td class="mono">1,520</td><td class="mono">210,000</td><td class="mono text-down">1.2%</td><td class="mono">28.5M ฿</td><td class="mono text-down">-0.4%</td></tr>
+      </tbody>
+    </table>
+
+    <div style="margin-top:24px"></div>
+    <div class="section-label">Segment Snapshot — Villa</div>
+    <div style="margin:14px 0"></div>
+    <table class="data-table">
+      <thead><tr><th>Segment</th><th>Threshold</th><th>Projects</th><th>Total Villas</th><th>Median ฿/sqm (BUA)</th><th>Absorption/mo</th><th>Avg Villa Price</th><th>฿/sqm Δ WoW</th></tr></thead>
+      <tbody>
+        <tr><td><span class="seg seg-low"><span class="seg-dot"></span>Low</span></td><td class="mono small">&lt;15M ฿</td><td class="mono">3</td><td class="mono">84</td><td class="mono">42,000</td><td class="mono">3.4%</td><td class="mono">11M ฿</td><td class="mono flat">0%</td></tr>
+        <tr><td><span class="seg seg-mid"><span class="seg-dot"></span>Mid</span></td><td class="mono small">15–35M ฿</td><td class="mono">6</td><td class="mono">156</td><td class="mono">68,000</td><td class="mono text-up">4.2%</td><td class="mono">24M ฿</td><td class="mono text-up">+1.8%</td></tr>
+        <tr><td><span class="seg seg-high"><span class="seg-dot"></span>High</span></td><td class="mono small">35–90M ฿</td><td class="mono">5</td><td class="mono">96</td><td class="mono">108,000</td><td class="mono">2.9%</td><td class="mono">58M ฿</td><td class="mono text-up">+3.1%</td></tr>
+        <tr><td><span class="seg seg-lux"><span class="seg-dot"></span>Luxury</span></td><td class="mono small">90M+ ฿</td><td class="mono">2</td><td class="mono">18</td><td class="mono">195,000</td><td class="mono text-down">0.8%</td><td class="mono">120M ฿</td><td class="mono flat">0%</td></tr>
+      </tbody>
+    </table>
+
+    <!-- Example project segment card -->
+    <div class="divider"></div>
+    <div class="section-label">Example: How a Project Gets Its Segment Tag</div>
+    <div style="margin:14px 0"></div>
+    <div class="chart-card">
+      <div class="chart-card-title">Origin Plug &amp; Play · Bangtao · 288 units total</div>
+      <div class="chart-card-sub">Unit count per price band → 51% rule → segment assigned = <span class="seg seg-mid" style="display:inline-flex"><span class="seg-dot"></span>Mid</span></div>
+      <div class="seg-bar-wrap" style="height:28px; margin:12px 0">
+        <div class="seg-bar-seg seg-bar-low"  style="width:8%">8%</div>
+        <div class="seg-bar-seg seg-bar-mid"  style="width:63%">63% ✓</div>
+        <div class="seg-bar-seg seg-bar-high" style="width:22%">22%</div>
+        <div class="seg-bar-seg seg-bar-lux"  style="width:7%">7%</div>
+      </div>
+      <div class="seg-legend">
+        <div class="seg-legend-item"><div class="seg-legend-dot" style="background:var(--seg-low)"></div>Low &lt;8M: 23 units (8%)</div>
+        <div class="seg-legend-item"><div class="seg-legend-dot" style="background:var(--seg-mid)"></div>Mid 8–15M: 181 units (63%) ← <strong style="color:var(--gold)">assigned segment</strong></div>
+        <div class="seg-legend-item"><div class="seg-legend-dot" style="background:var(--seg-high)"></div>High 15–20M: 63 units (22%)</div>
+        <div class="seg-legend-item"><div class="seg-legend-dot" style="background:var(--seg-lux)"></div>Luxury 20M+: 21 units (7%)</div>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <!-- W3: PRICE TRENDS -->
+  <div class="panel" id="w-prices">
+  <div class="container">
+    <div class="section-label">Section 3 — Price Trends</div>
+    <div class="section-title">฿/sqm Dynamics Over Time</div>
+    <div class="section-sub">Weekly snapshots · median ฿/sqm · by district, segment, and product type</div>
+
+    <div class="chart-row" style="grid-template-columns:1fr">
+      <div class="chart-card">
+        <div class="chart-card-title">Median ฿/sqm by District — Condo · 12 Weeks</div>
+        <div class="chart-card-sub">Each point = median of psm_median across all active price lists in district for that week</div>
+        <canvas id="priceAreaLine" style="max-height:240px"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-row cols-2">
+      <div class="chart-card">
+        <div class="chart-card-title">Median ฿/sqm by Segment — Condo · 12 Weeks</div>
+        <div class="chart-card-sub">Low / Mid / High / Luxury trend lines</div>
+        <canvas id="priceSegLine" style="max-height:210px"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-title">฿/sqm Range by Product Type</div>
+        <div class="chart-card-sub">Min / Median / Max · current week</div>
+        <canvas id="priceTypeBar" style="max-height:210px"></canvas>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="section-label">Top Price Movers This Week</div>
+    <div style="margin:14px 0"></div>
+    <table class="data-table">
+      <thead><tr><th>Project</th><th>District</th><th>Type</th><th>Segment</th><th>฿/sqm Prev</th><th>฿/sqm Curr</th><th>Δ WoW</th><th>Snapshot</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Botanica Foresta</strong></td><td>Bangtao</td><td><span class="badge badge-sell">Villa</span></td><td><span class="seg seg-high"><span class="seg-dot"></span>High</span></td><td class="mono">142,000</td><td class="mono">148,200</td><td class="mono text-up">+4.4%</td><td class="mono text-muted">06 Mar</td></tr>
+        <tr><td><strong>Origin Plug &amp; Play 2</strong></td><td>Bangtao</td><td><span class="badge badge-sell">Condo</span></td><td><span class="seg seg-mid"><span class="seg-dot"></span>Mid</span></td><td class="mono">98,500</td><td class="mono">103,000</td><td class="mono text-up">+4.6%</td><td class="mono text-muted">05 Mar</td></tr>
+        <tr><td><strong>Title Kamala Sea</strong></td><td>Kamala</td><td><span class="badge badge-sell">Condo</span></td><td><span class="seg seg-lux"><span class="seg-dot"></span>Luxury</span></td><td class="mono">125,000</td><td class="mono">121,500</td><td class="mono text-down">-2.8%</td><td class="mono text-muted">04 Mar</td></tr>
+        <tr><td><strong>Anchan Tropicana</strong></td><td>Rawai</td><td><span class="badge badge-sell">Villa</span></td><td><span class="seg seg-high"><span class="seg-dot"></span>High</span></td><td class="mono">155,000</td><td class="mono">158,500</td><td class="mono text-up">+2.3%</td><td class="mono text-muted">03 Mar</td></tr>
+      </tbody>
+    </table>
+  </div>
+  </div>
+
+  <!-- W4: VELOCITY -->
+  <div class="panel" id="w-velocity">
+  <div class="container">
+    <div class="section-label">Section 4 — Sales Velocity</div>
+    <div class="section-title">Absorption Rate · by Segment, Type &amp; Unit Mix</div>
+    <div class="section-sub">Units sold per month · derived from inventory snapshots + sales launch date · segmented by 51% rule</div>
+
+    <!-- Velocity by segment -->
+    <div class="section-label" style="margin-bottom:12px">Velocity by Segment · Condo</div>
+    <div class="vel-grid">
+      <div class="vel-card"><div class="vel-seg low">● Low</div><div class="vel-num">5.8<span style="font-size:14px;color:var(--muted)">%</span></div><div class="vel-unit">units/mo as % of inventory</div><div class="vel-delta text-up">▲ +0.3% vs last week</div></div>
+      <div class="vel-card"><div class="vel-seg mid">● Mid</div><div class="vel-num">4.1<span style="font-size:14px;color:var(--muted)">%</span></div><div class="vel-unit">units/mo as % of inventory</div><div class="vel-delta text-up">▲ +0.1% vs last week</div></div>
+      <div class="vel-card"><div class="vel-seg high">● High</div><div class="vel-num">3.2<span style="font-size:14px;color:var(--muted)">%</span></div><div class="vel-unit">units/mo as % of inventory</div><div class="vel-delta flat">→ unchanged</div></div>
+      <div class="vel-card"><div class="vel-seg lux">● Luxury</div><div class="vel-num">1.2<span style="font-size:14px;color:var(--muted)">%</span></div><div class="vel-unit">units/mo as % of inventory</div><div class="vel-delta text-down">▼ -0.4% vs last week</div></div>
+    </div>
+
+    <div class="chart-row cols-2">
+      <div class="chart-card">
+        <div class="chart-card-title">Absorption Rate by Segment · 8-Week Trend</div>
+        <div class="chart-card-sub">Condo only · Low / Mid / High / Luxury</div>
+        <canvas id="velSegLine" style="max-height:210px"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-title">Absorption Rate by District · Radar</div>
+        <div class="chart-card-sub">Median across projects per district · current week</div>
+        <canvas id="absAreaRadar" style="max-height:210px"></canvas>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Unit-mix velocity -->
+    <div class="section-label">Velocity by Unit Type — Condo</div>
+    <div style="margin:14px 0"></div>
+    <div class="chart-card">
+      <div class="chart-card-title">Units Sold per Month by Type · Studio / 1BR / 2BR / 3BR+ — Last 8 Weeks</div>
+      <div class="chart-card-sub">Stacked bar · absolute units sold per week aggregated across all tracked projects</div>
+      <canvas id="unitVelBar" style="max-height:230px"></canvas>
+    </div>
+
+    <div style="margin-top:18px"></div>
+    <table class="data-table">
+      <thead><tr><th>Unit Type</th><th>Units Available</th><th>Units Sold (mo)</th><th>Absorption/mo</th><th>Avg Days on Market</th><th>Segment Mix</th><th>Avg Price</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Studio</strong></td><td class="mono">1,840</td><td class="mono">124</td><td class="mono text-up">6.7%</td><td class="mono">14d</td><td><span class="seg seg-low" style="font-size:8px"><span class="seg-dot"></span>Low</span></td><td class="mono">3.8M ฿</td></tr>
+        <tr><td><strong>1 Bedroom</strong></td><td class="mono">4,210</td><td class="mono">231</td><td class="mono text-up">5.5%</td><td class="mono">18d</td><td><span class="seg seg-mid" style="font-size:8px"><span class="seg-dot"></span>Mid</span></td><td class="mono">8.9M ฿</td></tr>
+        <tr><td><strong>2 Bedroom</strong></td><td class="mono">3,890</td><td class="mono">148</td><td class="mono">3.8%</td><td class="mono">26d</td><td><span class="seg seg-high" style="font-size:8px"><span class="seg-dot"></span>High</span></td><td class="mono">16.2M ฿</td></tr>
+        <tr><td><strong>3 Bedroom+</strong></td><td class="mono">920</td><td class="mono">18</td><td class="mono text-down">2.0%</td><td class="mono">54d</td><td><span class="seg seg-lux" style="font-size:8px"><span class="seg-dot"></span>Luxury</span></td><td class="mono">29.4M ฿</td></tr>
+        <tr><td><strong>Penthouse</strong></td><td class="mono">184</td><td class="mono">2</td><td class="mono text-down">1.1%</td><td class="mono">90d+</td><td><span class="seg seg-lux" style="font-size:8px"><span class="seg-dot"></span>Luxury</span></td><td class="mono">48M ฿</td></tr>
+      </tbody>
+    </table>
+
+    <div style="margin-top:24px"></div>
+    <div class="section-label">Velocity by Unit Type — Villa (by Bedrooms)</div>
+    <div style="margin:14px 0"></div>
+    <table class="data-table">
+      <thead><tr><th>Villa Type</th><th>Villas Available</th><th>Sold (mo)</th><th>Absorption/mo</th><th>Avg Land sqm</th><th>Avg BUA sqm</th><th>Segment</th><th>Avg Price</th></tr></thead>
+      <tbody>
+        <tr><td><strong>2 Bedroom</strong></td><td class="mono">42</td><td class="mono">4</td><td class="mono text-up">9.5%</td><td class="mono">280</td><td class="mono">180</td><td><span class="seg seg-low" style="font-size:8px"><span class="seg-dot"></span>Low</span></td><td class="mono">12M ฿</td></tr>
+        <tr><td><strong>3 Bedroom</strong></td><td class="mono">138</td><td class="mono">8</td><td class="mono text-up">5.8%</td><td class="mono">420</td><td class="mono">260</td><td><span class="seg seg-mid" style="font-size:8px"><span class="seg-dot"></span>Mid</span></td><td class="mono">26M ฿</td></tr>
+        <tr><td><strong>4 Bedroom</strong></td><td class="mono">64</td><td class="mono">2</td><td class="mono">3.1%</td><td class="mono">620</td><td class="mono">380</td><td><span class="seg seg-high" style="font-size:8px"><span class="seg-dot"></span>High</span></td><td class="mono">62M ฿</td></tr>
+        <tr><td><strong>5 Bedroom+</strong></td><td class="mono">18</td><td class="mono">0</td><td class="mono text-down">0.0%</td><td class="mono">1,200</td><td class="mono">650</td><td><span class="seg seg-lux" style="font-size:8px"><span class="seg-dot"></span>Luxury</span></td><td class="mono">115M ฿</td></tr>
+      </tbody>
+    </table>
+
+    <!-- Project ranking -->
+    <div class="divider"></div>
+    <div class="section-label">Project Absorption Ranking (active sales, min 20 units)</div>
+    <div style="margin:14px 0"></div>
+    <div class="chart-card">
+      <canvas id="absRankChart" style="max-height:260px"></canvas>
+    </div>
+  </div>
+  </div>
+
+  <!-- W5: PROJECTS -->
+  <div class="panel" id="w-projects">
+  <div class="container">
+    <div class="section-label">Section 5 — New Projects &amp; Coverage</div>
+    <div class="section-title">Added This Week: 4 Projects</div>
+    <div class="section-sub">Auto-detected by scraper · segment classification requires price list · coverage gaps flagged</div>
+
+    <div class="chart-row cols-2">
+      <div class="chart-card">
+        <div class="chart-card-title">Active Projects by District</div>
+        <canvas id="mapChart" style="max-height:200px"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-title">Data Quality Score Distribution</div>
+        <div class="chart-card-sub">0–100 · completeness: has price list, launch date, unit breakdown, verified developer</div>
+        <canvas id="qualityChart" style="max-height:200px"></canvas>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="section-label">Projects Without Price List — Outreach Priority</div>
+    <div style="margin:14px 0"></div>
+    <table class="data-table">
+      <thead><tr><th>Project</th><th>District</th><th>Developer</th><th>Type</th><th>Segment</th><th>Days w/o Price</th><th>Contact</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Title Kamala Bay</strong></td><td>Kamala</td><td>Rhom Bho Property</td><td>Condo</td><td><span class="text-muted small">pending</span></td><td class="mono text-down">47</td><td>@sales_title_th</td><td><span class="badge badge-pre">Awaiting</span></td></tr>
+        <tr><td><strong>Mono Loft Rawai</strong></td><td>Rawai</td><td>Mono Development</td><td>Condo</td><td><span class="text-muted small">pending</span></td><td class="mono text-down">31</td><td>—</td><td><span class="badge" style="background:rgba(255,59,48,0.2);color:#F87171;border:1px solid rgba(255,59,48,0.4)">No Contact</span></td></tr>
+        <tr><td><strong>Skypark Celeste</strong></td><td>Ko Kaeo</td><td>—</td><td>Condo</td><td><span class="text-muted small">duplicate?</span></td><td class="mono">38</td><td>—</td><td><span class="badge badge-pre">Verify</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  </div>
+
+  <!-- W6: SIGNALS -->
+  <div class="panel" id="w-anomalies">
+  <div class="container">
+    <div class="section-label">Section 6 — Signals &amp; Anomalies</div>
+    <div class="section-title">Auto-Detected Deviations</div>
+    <div class="section-sub">Compares current vs previous snapshot · thresholds configurable · segment-aware detection</div>
+    <div class="rule-box"><strong>Detection logic:</strong> Δ ฿/sqm &gt;3%/week · Absorption shift &gt;1.5%/mo · Available units increased (cancellation) · Segment boundary crossing (price list update moves project to new segment) · New developer · Data gap &gt;30d</div>
+    <div style="margin:20px 0"></div>
+    <div class="anomaly-list">
+      <div class="anomaly-item good"><div class="anomaly-icon">🟢</div><div class="anomaly-text good"><strong>Bangtao Mid-Condo: 3 developers raised prices simultaneously</strong>Origin, Mono, Botanica all updated price lists this week. Likely demand-driven or infrastructure trigger. Monitor next 2 weeks for segment boundary crossing.</div></div>
+      <div class="anomaly-item warn"><div class="anomaly-icon">🟡</div><div class="anomaly-text warn"><strong>Rawai: 3 new projects, 2 unclassified (no segment yet)</strong>No price lists received. Segment remains <code>unknown</code>. Agent A2 outreach queued.</div></div>
+      <div class="anomaly-item danger"><div class="anomaly-icon">🔴</div><div class="anomaly-text danger"><strong>Title Kamala Sea: price -2.8% → approaching High/Luxury boundary</strong>If next snapshot confirms &lt;15M ฿ for 51% of units, project reclassifies from Luxury → High. Absorption already lowest in segment.</div></div>
+      <div class="anomaly-item warn"><div class="anomaly-icon">🟡</div><div class="anomaly-text warn"><strong>Laguna Sky Park: +2 available units — booking cancellation detected</strong>units_available[t] &gt; units_available[t-1]. Absorption rate recalculated. No segment impact.</div></div>
+      <div class="anomaly-item danger"><div class="anomaly-icon">🔴</div><div class="anomaly-text danger"><strong>23 projects stale &gt;30 days — segment assignments unverifiable</strong>Coverage dropped to 72%. 8 of 23 are in Luxury segment — highest risk of misclassification.</div></div>
+    </div>
+  </div>
+  </div>
+
+  <!-- W7: SCHEMA -->
+  <div class="panel" id="w-schema">
+  <div class="container">
+    <div class="section-label">Section 7 — Data Schema</div>
+    <div class="section-title">Platform Data Structure</div>
+    <div class="section-sub">Every report metric maps to a specific field · segmentation derived from units[] array</div>
+
+    <div class="chart-row cols-2" style="margin-bottom:20px">
+      <div>
+        <div style="color:var(--gold);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;font-weight:700">projects — master record</div>
+        <div class="json-block"><span class="j-comment">// PostgreSQL: projects table</span>
+{
+  <span class="j-key">"project_id"</span>: <span class="j-str">"uuid-v4"</span>,
+  <span class="j-key">"name"</span>: <span class="j-str">"Origin Plug &amp; Play"</span>,
+  <span class="j-key">"developer"</span>: <span class="j-str">"Origin Property Public Co."</span>,
+  <span class="j-key">"district"</span>: <span class="j-str">"Bangtao"</span>,
+  <span class="j-key">"sub_district"</span>: <span class="j-str">"Cherngtalay"</span>,
+  <span class="j-key">"product_type"</span>: <span class="j-str">"condo"</span>, <span class="j-comment">// condo|villa|townhouse|mixed</span>
+  <span class="j-key">"freehold_available"</span>: <span class="j-bool">true</span>,
+  <span class="j-key">"units_total"</span>: <span class="j-num">288</span>,
+  <span class="j-key">"floors"</span>: <span class="j-num">8</span>,
+  <span class="j-key">"buildings"</span>: <span class="j-num">3</span>,
+  <span class="j-key">"status"</span>: <span class="j-str">"selling"</span>,
+  <span class="j-key">"sales_launch_date"</span>: <span class="j-str">"2024-01-15"</span>,
+  <span class="j-key">"completion_date"</span>: <span class="j-str">"2026-09-01"</span>,
+  <span class="j-key">"has_sales_kit"</span>: <span class="j-bool">true</span>,   <span class="j-comment">// A2 received a price file</span>
+  <span class="j-key">"has_contacts"</span>: <span class="j-bool">true</span>,    <span class="j-comment">// A1b found a sales contact</span>
+  <span class="j-key">"last_price_date"</span>: <span class="j-str">"2026-03-05"</span>,
+  <span class="j-key">"data_quality_score"</span>: <span class="j-num">87</span>,  <span class="j-comment">// 0–100 · 7-criteria model</span>
+  <span class="j-key">"trust_index"</span>: <span class="j-num">89</span>        <span class="j-comment">// manual analyst input · methodology TBD</span>
+}</div>
+      </div>
+      <div>
+        <div style="color:var(--gold);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;font-weight:700">source_files — file journal (physical copy guard)</div>
+        <div class="json-block"><span class="j-comment">// Every incoming price file = one record — two links stored</span>
+{
+  <span class="j-key">"id"</span>: <span class="j-str">"uuid-v4"</span>,
+  <span class="j-key">"project_id"</span>: <span class="j-str">"ref → projects"</span>,
+  <span class="j-key">"received_at"</span>: <span class="j-str">"2026-03-05T09:12:00Z"</span>,
+  <span class="j-key">"file_date"</span>: <span class="j-str">"2026-03-04"</span>,
+  <span class="j-key">"gdrive_url_original"</span>: <span class="j-str">"developer's folder"</span>,
+  <span class="j-key">"gdrive_url_copy"</span>: <span class="j-str">"/incoming/origin_pp_20260305.pdf"</span>,
+  <span class="j-key">"file_format"</span>: <span class="j-str">"pdf"</span>,  <span class="j-comment">// pdf|xlsx|jpg</span>
+  <span class="j-key">"source_channel"</span>: <span class="j-str">"whatsapp"</span>,
+  <span class="j-key">"parse_status"</span>: <span class="j-str">"ok"</span>,   <span class="j-comment">// pending|ok|needs_review|failed</span>
+  <span class="j-key">"changed_vs_previous"</span>: <span class="j-bool">true</span>, <span class="j-comment">// triggered new snapshot</span>
+  <span class="j-key">"confidence_avg"</span>: <span class="j-num">0.94</span>
+}</div>
+        <div style="color:var(--gold);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;font-weight:700">price_snapshots — immutable record per update</div>
+        <div class="json-block"><span class="j-comment">// New record each update — never overwritten</span>
+{
+  <span class="j-key">"snapshot_id"</span>: <span class="j-str">"uuid-v4"</span>,
+  <span class="j-key">"project_id"</span>: <span class="j-str">"ref → projects"</span>,
+  <span class="j-key">"snapshot_date"</span>: <span class="j-str">"2026-03-05"</span>,
+  <span class="j-key">"source_file_id"</span>: <span class="j-str">"ref → source_files"</span>,
+  <span class="j-key">"units_total"</span>: <span class="j-num">288</span>,
+  <span class="j-key">"units_available"</span>: <span class="j-num">41</span>,
+  <span class="j-key">"units_sold"</span>: <span class="j-num">247</span>,
+  <span class="j-key">"units_reserved"</span>: <span class="j-num">0</span>,
+  <span class="j-key">"psm_min"</span>: <span class="j-num">88000</span>,
+  <span class="j-key">"psm_max"</span>: <span class="j-num">142000</span>,
+  <span class="j-key">"psm_median"</span>: <span class="j-num">103000</span>,
+  <span class="j-key">"psm_delta_vs_prev"</span>: <span class="j-num">500</span>,  <span class="j-comment">// Δ ฿/sqm vs previous snapshot</span>
+  <span class="j-comment">// Segment bands — computed from units[]</span>
+  <span class="j-key">"band_low_count"</span>: <span class="j-num">23</span>,   <span class="j-comment">// &lt;8M ฿</span>
+  <span class="j-key">"band_mid_count"</span>: <span class="j-num">181</span>,  <span class="j-comment">// 8–15M ฿ ← 63% → segment = mid</span>
+  <span class="j-key">"band_high_count"</span>: <span class="j-num">63</span>,  <span class="j-comment">// 15–20M ฿</span>
+  <span class="j-key">"band_lux_count"</span>: <span class="j-num">21</span>,   <span class="j-comment">// 20M+ ฿</span>
+  <span class="j-key">"segment_assigned"</span>: <span class="j-str">"mid"</span>,
+  <span class="j-key">"segment_changed"</span>: <span class="j-bool">false</span>,  <span class="j-comment">// true = crossing event → anomaly</span>
+  <span class="j-key">"confidence_score"</span>: <span class="j-num">0.91</span>,
+  <span class="j-key">"cancellation_detected"</span>: <span class="j-bool">false</span>, <span class="j-comment">// units_available increased</span>
+  <span class="j-key">"promo_active"</span>: <span class="j-bool">false</span>  <span class="j-comment">// price_promo_thb set on any unit</span>
+}</div>
+      </div>
+    </div>
+
+    <div style="color:var(--gold);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;font-weight:700">units — per-unit row (separate table, not JSONB)</div>
+    <div class="json-block"><span class="j-comment">// Separate table — enables cross-project queries on unit level</span>
+{
+  <span class="j-key">"unit_ref"</span>: <span class="j-str">"A-301"</span>,
+  <span class="j-key">"unit_type"</span>: <span class="j-str">"1BR"</span>,       <span class="j-comment">// studio|1BR|2BR|3BR|penthouse · OR villa_2bed … villa_5bed</span>
+  <span class="j-key">"area_sqm"</span>: <span class="j-num">68.5</span>,          <span class="j-comment">// NSA for condo, BUA for villa</span>
+  <span class="j-key">"land_sqm"</span>: <span class="j-bool">null</span>,          <span class="j-comment">// villas only</span>
+  <span class="j-key">"floor"</span>: <span class="j-num">3</span>,               <span class="j-comment">// null for villas</span>
+  <span class="j-key">"view"</span>: <span class="j-str">"pool"</span>,            <span class="j-comment">// sea|pool|garden|city|null</span>
+  <span class="j-key">"ownership_type"</span>: <span class="j-str">"leasehold"</span>,  <span class="j-comment">// always explicit — leasehold|freehold</span>
+  <span class="j-key">"price_thb"</span>: <span class="j-num">9800000</span>,      <span class="j-comment">// base price — always present</span>
+  <span class="j-key">"price_list_thb"</span>: <span class="j-num">10200000</span>,  <span class="j-comment">// list price before discount (if shown)</span>
+  <span class="j-key">"price_promo_thb"</span>: <span class="j-bool">null</span>,      <span class="j-comment">// promo price if separately listed</span>
+  <span class="j-key">"price_per_sqm"</span>: <span class="j-num">143066</span>,
+  <span class="j-key">"status"</span>: <span class="j-str">"available"</span>       <span class="j-comment">// available|sold|reserved|needs_review</span>
+}</div>
+
+    <div style="margin-top:20px"></div>
+    <div style="color:var(--gold);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;font-weight:700">Derived fields — computed by Agent A4</div>
+    <div class="json-block"><span class="j-comment">// Not stored. Recalculated each report generation.</span>
+
+<span class="j-type">segment</span> = band with count ≥ ceil(units_total × 0.51)
+  → if no band qualifies: segment = <span class="j-str">"mixed"</span>, shown in all applicable
+
+<span class="j-type">absorption_rate_monthly</span> =
+  (units_sold / units_total) / months_since_launch × 100
+
+<span class="j-type">psm_delta_weekly</span> =
+  (snapshot_curr.psm_median − snapshot_prev.psm_median) / snapshot_prev.psm_median × 100
+
+<span class="j-type">segment_crossing_flag</span> =
+  snapshot_curr.segment_assigned ≠ snapshot_prev.segment_assigned → anomaly: "segment_reclassified"
+
+<span class="j-type">data_quality_score</span> =
+  has_price_list_fresh_14d(+25) + has_unit_breakdown(+20)
+  + has_launch_date(+15) + developer_verified(+15)
+  + units_total_known(+10) + has_contacts(+10) + has_completion_date(+5)
+
+<span class="j-type">trust_index</span> = <span class="j-comment">// manual input by analyst — not computed. Methodology: next iteration.</span>
+
+<span class="j-type">llm_provider</span> = <span class="j-str">"Claude API"</span>  <span class="j-comment">// normalization + Vision + Link Extractor + A4 narrative</span></div>
+
+    <div style="margin-top:20px"></div>
+    <div class="rule-box"><strong>5 tables in PostgreSQL:</strong> <code>projects</code> · <code>source_files</code> · <code>price_snapshots</code> · <code>units</code> · <code>contacts</code>. Segment assigned per snapshot — so segment history is preserved. <code>source_files</code> stores both the original developer link and our physical Drive copy — data never lost if developer deletes their folder. Existing Sales Kits → parse into <code>price_snapshots</code> with <code>snapshot_date = file date</code>.</div>
+
+    <div style="margin-top:20px"></div>
+    <div style="color:var(--gold);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;font-weight:700">Telegram Bot — Command Reference</div>
+    <div class="json-block"><span class="j-comment">// All commands available in bot. Admin-only: /run</span>
+
+<span class="j-type">/report</span>          <span class="j-comment">→ Latest weekly PDF report</span>
+<span class="j-type">/status</span>          <span class="j-comment">→ Agent status: last run · errors · coverage rate</span>
+<span class="j-type">/run [agent]</span>     <span class="j-comment">→ Manual agent trigger (admin only) · A1 / A2 / A3 / A4 / A5</span>
+<span class="j-type">/new_project [url]</span> <span class="j-comment">→ Urgently queue project for A1</span>
+<span class="j-type">/passport [name|id]</span>       <span class="j-comment">→ PDF passport of specific project</span>
+<span class="j-type">/passport_compare [p1] [p2]</span> <span class="j-comment">→ Side-by-side comparison of two projects</span>
+<span class="j-type">/passport_list [district]</span>   <span class="j-comment">→ All passports in district with key metrics</span></div>
+
+    <div style="margin-top:16px"></div>
+    <div class="rule-box"><strong>Implementation phases:</strong> Фаза 0.5 (Excel cleanup → Supabase import · 3–5 days) → Фаза 0 (infra: Python · Supabase 5 tables · Sheets API · Telegram skeleton · Claude API · 1–2 wks) → Фаза 1 (A1 scraper + A1b · 3–4 wks) → Фаза 2 (A3 parser + A2b link extractor · 3–4 wks) → Фаза 3 (A4 analytics + first passports + A5 · 2–3 wks) → Фаза 4 (A2 communicator · 2–3 wks) → Фаза 5 (weekly cadence · alerts · /passport · 2–3 wks). Total: ~3–4 months to production.</div>
+  </div>
+  </div>
+
+
+</div><!-- end mode-weekly -->
+
+<!-- ══════════════════════════════════════════════════════════ PROJECT PASSPORT MODE -->
+<div class="mode-panel" id="mode-passport">
+  <nav class="nav">
+    <div class="nav-brand">MAKUHA</div>
+    <div class="nav-tabs" style="align-items:center;gap:12px;padding:8px 0">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:0.1em">TYPE:</span>
+      <select id="pp-type-select" onchange="ppFilterType()" style="background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--cream);font-family:'IBM Plex Mono',sans-serif;font-size:11px;padding:5px 10px;border-radius:4px;cursor:pointer;outline:none">
+        <option value="">— Select Type —</option>
+        <option value="Condo">Condo</option>
+        <option value="Villa">Villa</option>
+        <option value="Townhouse">Townhouse</option>
+        <option value="Mixed">Mixed</option>
+      </select>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:0.1em">PROJECT:</span>
+      <select id="pp-project-select" onchange="ppLoadProject()" style="background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--cream);font-family:'IBM Plex Mono',sans-serif;font-size:11px;padding:5px 10px;border-radius:4px;cursor:pointer;outline:none;min-width:240px">
+        <option value="">— Select Type first —</option>
+      </select>
+    </div>
+    <div class="nav-meta">Project Passport · Live</div>
+  </nav>
+
+  <div id="pp-content">
+    <div class="container" style="padding-top:60px;text-align:center;opacity:0.4">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:22px;margin-bottom:8px">Select a project type and project above</div>
+      <div style="font-size:12px;color:var(--muted)">Full passport will render here</div>
+    </div>
+  </div>
+</div><!-- end mode-passport -->
+
+<!-- ══════════════════════════════════════════════════════════ PLATFORM DASHBOARD MODE -->
+<div class="mode-panel" id="mode-platform">
+  <nav class="nav">
+    <div class="nav-brand">MAKUHA</div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="showPlatform('market')">① Market</button>
+      <button class="nav-tab" onclick="showPlatform('segments-dash')">② Segments</button>
+      <button class="nav-tab" onclick="showPlatform('units-dash')">③ Unit Mix</button>
+      <button class="nav-tab" onclick="showPlatform('velocity-dash')">④ Velocity</button>
+      <button class="nav-tab" onclick="showPlatform('finance-dash')">⑤ Financials</button>
+    </div>
+    <div class="nav-meta">Platform Dashboard · Live</div>
+  </nav>
+
+  <!-- P1: MARKET -->
+  <div class="panel active" id="p-market">
+  <div class="container">
+    <div class="section-label">Platform Dashboard — Market Overview</div>
+    <div class="section-title">Phuket Off-Plan Market · All Segments</div>
+    <div class="section-sub">Aggregate view across all tracked projects · updated weekly from price snapshots</div>
+
+    <div class="kpi-grid kpi-grid-5">
+      <div class="kpi-card"><div class="kpi-label">Total Projects</div><div class="kpi-value">317</div><div class="market-share-pill">All types</div></div>
+      <div class="kpi-card"><div class="kpi-label">Total Units Tracked</div><div class="kpi-value">31,040</div><div class="market-share-pill">incl. sold</div></div>
+      <div class="kpi-card green"><div class="kpi-label">Units Available</div><div class="kpi-value">9,240</div><div class="market-share-pill">30% of total</div></div>
+      <div class="kpi-card warn"><div class="kpi-label">Units Sold (all time)</div><div class="kpi-value">21,800</div><div class="market-share-pill">70% absorbed</div></div>
+      <div class="kpi-card red"><div class="kpi-label">Total Market Value</div><div class="kpi-value">₿142B</div><div class="market-share-pill">฿ total GDV</div></div>
+    </div>
+
+    <div class="chart-row cols-3">
+      <div class="chart-card">
+        <div class="chart-card-title">Projects by Type</div>
+        <canvas id="dash-typeDonut" style="max-height:180px"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-title">Project Launches by Quarter</div>
+        <div class="chart-card-sub">Number of new project launches over time</div>
+        <canvas id="dash-launchBar" style="max-height:180px"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-title">Completions by Quarter</div>
+        <div class="chart-card-sub">Expected handovers</div>
+        <canvas id="dash-completionBar" style="max-height:180px"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-row cols-2">
+      <div class="chart-card">
+        <div class="chart-card-title">Market Value by Segment · Condo</div>
+        <div class="chart-card-sub">Total GDV per segment (฿ billion)</div>
+        <canvas id="dash-gdvBar" style="max-height:200px"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-title">Units Sold per Month · Last 12 Months</div>
+        <div class="chart-card-sub">All types combined · with type breakdown</div>
+        <canvas id="dash-salesLine" style="max-height:200px"></canvas>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <!-- P2: SEGMENTS DASH -->
+  <div class="panel" id="p-segments-dash">
+  <div class="container">
+    <div class="section-label">Platform Dashboard — Segment Analysis</div>
+    <div class="section-title">Low · Mid · High · Luxury — Full Breakdown</div>
+    <div class="section-sub">Condo and Villa segments · 51% unit-count rule · historical segment migration tracked</div>
+
+    <div class="chart-row cols-2">
+      <div class="chart-card">
+        <div class="chart-card-title">Segment Share Over Time — Condo Projects</div>
+        <div class="chart-card-sub">% of active projects per segment · quarterly</div>
+        <canvas id="dash-segTrend" style="max-height:220px"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-title">Average ฿/sqm per Segment · 12-Week Trend</div>
+        <canvas id="dash-segPriceLine" style="max-height:220px"></canvas>
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-top:8px">Segment Detail — Condo · Current State</div>
+    <div style="margin:14px 0"></div>
+    <table class="data-table">
+      <thead><tr><th>Segment</th><th>Projects</th><th>Units Total</th><th>Units Avail.</th><th>Absorption/mo</th><th>Median ฿/sqm</th><th>GDV (฿B)</th><th>% of Market GDV</th></tr></thead>
+      <tbody>
+        <tr><td><span class="seg seg-low"><span class="seg-dot"></span>Low</span></td><td class="mono">84</td><td class="mono">9,840</td><td class="mono">2,460</td><td class="mono text-up">5.8%</td><td class="mono">72,000</td><td class="mono">53.1B</td><td class="mono">37%</td></tr>
+        <tr><td><span class="seg seg-mid"><span class="seg-dot"></span>Mid</span></td><td class="mono">112</td><td class="mono">14,320</td><td class="mono">4,010</td><td class="mono text-up">4.1%</td><td class="mono">112,000</td><td class="mono">57.6B</td><td class="mono">41%</td></tr>
+        <tr><td><span class="seg seg-high"><span class="seg-dot"></span>High</span></td><td class="mono">67</td><td class="mono">5,360</td><td class="mono">2,145</td><td class="mono">3.2%</td><td class="mono">148,000</td><td class="mono">22.4B</td><td class="mono">16%</td></tr>
+        <tr><td><span class="seg seg-lux"><span class="seg-dot"></span>Luxury</span></td><td class="mono">38</td><td class="mono">1,520</td><td class="mono">627</td><td class="mono text-down">1.2%</td><td class="mono">210,000</td><td class="mono">8.6B</td><td class="mono">6%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  </div>
+
+  <!-- P3: UNIT MIX DASH -->
+  <div class="panel" id="p-units-dash">
+  <div class="container">
+    <div class="section-label">Platform Dashboard — Unit Mix Analysis</div>
+    <div class="section-title">Condo Unit Types · Villa Bedroom Types</div>
+    <div class="section-sub">Breakdown by unit type · count, share, area, price range · across all tracked projects</div>
+
+    <!-- Condo unit mix -->
+    <div class="section-label">Condo — Unit Type Breakdown</div>
+    <div style="margin:14px 0"></div>
+    <div class="chart-row cols-2">
+      <div class="chart-card">
+        <div class="chart-card-title">Unit Count by Type</div>
+        <canvas id="dash-unitDonut" style="max-height:200px"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-title">Unit Mix — Count &amp; Share</div>
+        <div style="margin-top:12px">
+          <div class="unit-mix-row"><div class="unit-mix-label">Studio</div><div class="unit-mix-bar-bg"><div class="unit-mix-bar-fill" style="width:18%"></div></div><div class="unit-mix-pct">18%</div><div class="unit-mix-count">5,587</div></div>
+          <div class="unit-mix-row"><div class="unit-mix-label">1 Bedroom</div><div class="unit-mix-bar-bg"><div class="unit-mix-bar-fill" style="width:38%"></div></div><div class="unit-mix-pct">38%</div><div class="unit-mix-count">11,795</div></div>
+          <div class="unit-mix-row"><div class="unit-mix-label">2 Bedroom</div><div class="unit-mix-bar-bg"><div class="unit-mix-bar-fill" style="width:31%"></div></div><div class="unit-mix-pct">31%</div><div class="unit-mix-count">9,622</div></div>
+          <div class="unit-mix-row"><div class="unit-mix-label">3 Bedroom+</div><div class="unit-mix-bar-bg"><div class="unit-mix-bar-fill" style="width:10%"></div></div><div class="unit-mix-pct">10%</div><div class="unit-mix-count">3,104</div></div>
+          <div class="unit-mix-row"><div class="unit-mix-label">Penthouse</div><div class="unit-mix-bar-bg"><div class="unit-mix-bar-fill" style="width:3%"></div></div><div class="unit-mix-pct">3%</div><div class="unit-mix-count">932</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:18px"></div>
+    <table class="data-table">
+      <thead><tr><th>Unit Type</th><th>Count</th><th>Share</th><th>Area sqm (min/avg/max)</th><th>Price THB (min/avg/max)</th><th>฿/sqm (min/avg/max)</th><th>Dominant Seg</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Studio</strong></td><td class="mono">5,587</td><td class="mono">18%</td><td class="mono">24 / 31 / 42</td><td class="mono">2.1M / 3.8M / 6.2M</td><td class="mono">72k / 91k / 132k</td><td><span class="seg seg-low" style="font-size:8px"><span class="seg-dot"></span>Low</span></td></tr>
+        <tr><td><strong>1 Bedroom</strong></td><td class="mono">11,795</td><td class="mono">38%</td><td class="mono">35 / 52 / 74</td><td class="mono">4.8M / 8.9M / 16M</td><td class="mono">84k / 108k / 168k</td><td><span class="seg seg-mid" style="font-size:8px"><span class="seg-dot"></span>Mid</span></td></tr>
+        <tr><td><strong>2 Bedroom</strong></td><td class="mono">9,622</td><td class="mono">31%</td><td class="mono">60 / 86 / 124</td><td class="mono">9.2M / 16.2M / 28M</td><td class="mono">98k / 132k / 198k</td><td><span class="seg seg-high" style="font-size:8px"><span class="seg-dot"></span>High</span></td></tr>
+        <tr><td><strong>3 Bedroom+</strong></td><td class="mono">3,104</td><td class="mono">10%</td><td class="mono">96 / 142 / 210</td><td class="mono">18M / 29.4M / 58M</td><td class="mono">128k / 168k / 240k</td><td><span class="seg seg-lux" style="font-size:8px"><span class="seg-dot"></span>Luxury</span></td></tr>
+        <tr><td><strong>Penthouse</strong></td><td class="mono">932</td><td class="mono">3%</td><td class="mono">180 / 260 / 480</td><td class="mono">28M / 48M / 120M</td><td class="mono">142k / 192k / 310k</td><td><span class="seg seg-lux" style="font-size:8px"><span class="seg-dot"></span>Luxury</span></td></tr>
+      </tbody>
+    </table>
+
+    <div class="divider"></div>
+    <div class="section-label">Villa — Bedroom Type Breakdown</div>
+    <div style="margin:14px 0"></div>
+    <table class="data-table">
+      <thead><tr><th>Villa Type</th><th>Count</th><th>Land sqm (min/avg/max)</th><th>BUA sqm (min/avg/max)</th><th>Price THB (min/avg/max)</th><th>฿/sqm BUA (avg)</th><th>Segment</th></tr></thead>
+      <tbody>
+        <tr><td><strong>2 Bedroom</strong></td><td class="mono">42</td><td class="mono">200 / 280 / 380</td><td class="mono">140 / 180 / 220</td><td class="mono">9M / 12M / 18M</td><td class="mono">67,000</td><td><span class="seg seg-low" style="font-size:8px"><span class="seg-dot"></span>Low</span></td></tr>
+        <tr><td><strong>3 Bedroom</strong></td><td class="mono">138</td><td class="mono">280 / 420 / 680</td><td class="mono">200 / 260 / 380</td><td class="mono">14M / 26M / 42M</td><td class="mono">100,000</td><td><span class="seg seg-mid" style="font-size:8px"><span class="seg-dot"></span>Mid</span></td></tr>
+        <tr><td><strong>4 Bedroom</strong></td><td class="mono">64</td><td class="mono">450 / 620 / 980</td><td class="mono">280 / 380 / 520</td><td class="mono">32M / 62M / 98M</td><td class="mono">163,000</td><td><span class="seg seg-high" style="font-size:8px"><span class="seg-dot"></span>High</span></td></tr>
+        <tr><td><strong>5 Bedroom+</strong></td><td class="mono">18</td><td class="mono">900 / 1,200 / 2,400</td><td class="mono">480 / 650 / 980</td><td class="mono">85M / 115M / 180M</td><td class="mono">177,000</td><td><span class="seg seg-lux" style="font-size:8px"><span class="seg-dot"></span>Luxury</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  </div>
+
+  <!-- P4: VELOCITY DASH -->
+  <div class="panel" id="p-velocity-dash">
+  <div class="container">
+    <div class="section-label">Platform Dashboard — Sales Velocity</div>
+    <div class="section-title">Absorption Analysis — Full Market</div>
+    <div class="section-sub">Monthly absorption by segment · unit type · district · project ranking</div>
+
+    <div class="chart-row cols-2">
+      <div class="chart-card">
+        <div class="chart-card-title">Absorption Rate by Segment · 12-Month Trend</div>
+        <canvas id="dash-velTrend" style="max-height:220px"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-title">Units Sold by Type · Monthly · 12 Months</div>
+        <canvas id="dash-unitSalesBar" style="max-height:220px"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-card-title">Project Absorption Ranking — All Active Projects · Min 20 Units</div>
+      <div class="chart-card-sub">Color = segment · green = top quartile · red = bottom quartile</div>
+      <canvas id="dash-absRank" style="max-height:280px"></canvas>
+    </div>
+  </div>
+  </div>
+
+  <!-- P5: FINANCIALS DASH -->
+  <div class="panel" id="p-finance-dash">
+  <div class="container">
+    <div class="section-label">Platform Dashboard — Financial Indicators</div>
+    <div class="section-title">ROI · Rental Yield · Price Forecast</div>
+    <div class="section-sub">ROI from price appreciation + rental yield (AirDNA data) · forecast from price list history</div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card green"><div class="kpi-label">Avg Rental Yield · Condo</div><div class="kpi-value">6.2<span class="kpi-unit">%</span></div><div class="kpi-delta up">▲ +0.3% vs Q4 2025</div></div>
+      <div class="kpi-card"><div class="kpi-label">Avg Price Appreciation · YoY</div><div class="kpi-value">8.4<span class="kpi-unit">%</span></div><div class="kpi-delta up">▲ Bangtao led +12%</div></div>
+      <div class="kpi-card warn"><div class="kpi-label">Avg ROI (yield + capital)</div><div class="kpi-value">14.6<span class="kpi-unit">%</span></div><div class="kpi-delta flat">→ stable</div></div>
+      <div class="kpi-card purple"><div class="kpi-label">Luxury Yield</div><div class="kpi-value">4.1<span class="kpi-unit">%</span></div><div class="kpi-delta down">▼ lowest segment</div></div>
+    </div>
+
+    <div class="chart-row cols-2">
+      <div class="chart-card">
+        <div class="chart-card-title">Price Forecast · Condo · By Segment · +12 Months</div>
+        <div class="chart-card-sub">Based on historical ฿/sqm rate of change from price list snapshots</div>
+        <canvas id="dash-forecast" style="max-height:220px"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-title">Rental Yield by District · Current Quarter</div>
+        <div class="chart-card-sub">AirDNA data integrated · annual gross yield estimate</div>
+        <canvas id="dash-yield" style="max-height:220px"></canvas>
+      </div>
+    </div>
+
+    <div class="rule-box" style="margin-top:8px"><strong>Data sources for financials:</strong> ฿/sqm trends from <code>price_snapshots</code> · rental yield from AirDNA API (occupancy × ADR × 365 / purchase price) · ROI = rental yield + annual capital appreciation · Price forecast = linear regression on psm_median time series per segment</div>
+  </div>
+  </div>
+</div><!-- end mode-platform -->
+
+<script>
+const W=['W3','W4','W5','W6','W7','W8','W9','W10'];
+const Q=['Q1 24','Q2 24','Q3 24','Q4 24','Q1 25','Q2 25','Q3 25','Q4 25','Q1 26'];
+const gold='#FF8500',goldL='#CC6A00',navy='#0A0A0A';
+const segC={low:'#5BA3C9',mid:'#FF8500',high:'#FF8C00',lux:'#8B5FB0'};
+const TICK={color:'#444444',font:{family:'IBM Plex Mono',size:9}};
+const GRID={color:'rgba(255,255,255,0.04)'};
+const LEG={labels:{color:'#666666',font:{family:'IBM Plex Mono',size:10},usePointStyle:true,padding:12}};
+const BASE={plugins:{legend:LEG},scales:{x:{grid:GRID,ticks:TICK},y:{grid:GRID,ticks:TICK}}};
+
+function switchMode(m){
+  document.querySelectorAll('.mode-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('mode-'+m).classList.add('active');
+  event.target.classList.add('active');
+}
+function showWeekly(id){
+  document.querySelectorAll('#mode-weekly .panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('#mode-weekly .nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('w-'+id).classList.add('active');
+  event.target.classList.add('active');
+}
+function showPlatform(id){
+  document.querySelectorAll('#mode-platform .panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('#mode-platform .nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('p-'+id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ── WEEKLY CHARTS ──
+new Chart(document.getElementById('typeDonut'),{type:'doughnut',data:{labels:['Condo','Villa','Townhouse','Mixed'],datasets:[{data:[285,16,12,4],backgroundColor:['#FF8500','#5BA3C9','#E07000','#8B5FB0'],borderWidth:0}]},options:{cutout:'65%',plugins:{legend:{position:'right',labels:{color:'#555555',font:{family:'IBM Plex Mono',size:11},padding:10,generateLabels:function(chart){const d=chart.data;const total=d.datasets[0].data.reduce((a,b)=>a+b,0);return d.labels.map((l,i)=>({text:l+' '+Math.round(d.datasets[0].data[i]/total*100)+'%',fillStyle:d.datasets[0].backgroundColor[i],strokeStyle:'transparent',index:i}));}}},tooltip:{callbacks:{label:function(ctx){const total=ctx.dataset.data.reduce((a,b)=>a+b,0);const pct=Math.round(ctx.parsed/total*100);return ' '+ctx.label+': '+ctx.parsed+' ('+pct+'%)';}}}}}});
+
+new Chart(document.getElementById('newProjectsChart'),{type:'bar',data:{labels:W,datasets:[{label:'Condo',data:[1,1,2,1,1,1,1,3],backgroundColor:'rgba(255,133,0,0.7)',borderRadius:3},{label:'Villa',data:[1,0,1,0,1,0,1,1],backgroundColor:'rgba(91,163,201,0.7)',borderRadius:3}]},options:{...BASE,plugins:{legend:LEG,tooltip:{callbacks:{label:function(ctx){const datasets=ctx.chart.data.datasets;const total=datasets.reduce((s,ds)=>s+(ds.data[ctx.dataIndex]||0),0);const pct=total>0?Math.round(ctx.parsed.y/total*100):0;return ' '+ctx.dataset.label+': '+ctx.parsed.y+' ('+pct+'%)';}}}},scales:{x:{stacked:true,grid:GRID,ticks:TICK},y:{stacked:true,grid:GRID,ticks:TICK}}}});
+
+new Chart(document.getElementById('condoSegDonut'),{type:'doughnut',data:{labels:['Low','Mid','High','Luxury'],datasets:[{data:[84,112,67,38],backgroundColor:[segC.low,segC.mid,segC.high,segC.lux],borderWidth:0}]},options:{cutout:'62%',plugins:{legend:{position:'right',labels:{color:'#555555',font:{family:'IBM Plex Mono',size:11},padding:10,generateLabels:function(chart){const d=chart.data;const total=d.datasets[0].data.reduce((a,b)=>a+b,0);return d.labels.map((l,i)=>({text:l+' '+Math.round(d.datasets[0].data[i]/total*100)+'%',fillStyle:d.datasets[0].backgroundColor[i],strokeStyle:'transparent',index:i}));}}},tooltip:{callbacks:{label:function(ctx){const total=ctx.dataset.data.reduce((a,b)=>a+b,0);const pct=Math.round(ctx.parsed/total*100);return ' '+ctx.label+': '+ctx.parsed+' proj ('+pct+'%)';}}}}}});
+new Chart(document.getElementById('villaSegDonut'),{type:'doughnut',data:{labels:['Low','Mid','High','Luxury'],datasets:[{data:[3,6,5,2],backgroundColor:[segC.low,segC.mid,segC.high,segC.lux],borderWidth:0}]},options:{cutout:'62%',plugins:{legend:{position:'right',labels:{color:'#555555',font:{family:'IBM Plex Mono',size:11},padding:10,generateLabels:function(chart){const d=chart.data;const total=d.datasets[0].data.reduce((a,b)=>a+b,0);return d.labels.map((l,i)=>({text:l+' '+Math.round(d.datasets[0].data[i]/total*100)+'%',fillStyle:d.datasets[0].backgroundColor[i],strokeStyle:'transparent',index:i}));}}},tooltip:{callbacks:{label:function(ctx){const total=ctx.dataset.data.reduce((a,b)=>a+b,0);const pct=Math.round(ctx.parsed/total*100);return ' '+ctx.label+': '+ctx.parsed+' proj ('+pct+'%)';}}}}}});
+
+new Chart(document.getElementById('segDistrictBar'),{type:'bar',data:{labels:['Bangtao','Rawai','Kamala','Cherngtalay','Ko Kaeo','Patong'],datasets:[{label:'Low',data:[18,28,12,10,8,8],backgroundColor:'rgba(91,163,201,0.8)',borderRadius:3},{label:'Mid',data:[40,30,22,24,12,6],backgroundColor:'rgba(224,112,0,0.8)',borderRadius:3},{label:'High',data:[22,10,14,5,6,3],backgroundColor:'rgba(255,133,0,0.8)',borderRadius:3},{label:'Luxury',data:[9,4,6,2,2,1],backgroundColor:'rgba(139,95,176,0.8)',borderRadius:3}]},options:{...BASE,plugins:{legend:LEG,tooltip:{callbacks:{label:function(ctx){const datasets=ctx.chart.data.datasets;const total=datasets.reduce((s,ds)=>s+ds.data[ctx.dataIndex],0);const pct=Math.round(ctx.parsed.y/total*100);return ' '+ctx.dataset.label+': '+ctx.parsed.y+' ('+pct+'%)';}}}},scales:{x:{stacked:true,grid:GRID,ticks:TICK},y:{stacked:true,grid:GRID,ticks:TICK}}}});
+
+new Chart(document.getElementById('priceAreaLine'),{type:'line',data:{labels:W,datasets:[{label:'Bangtao',data:[138,140,141,143,144,145,146,148],borderColor:'#FF8500',tension:0.3,borderWidth:2,pointRadius:3,pointBackgroundColor:'#FF8500'},{label:'Rawai',data:[125,125,126,127,128,127,129,130],borderColor:'#5BA3C9',tension:0.3,borderWidth:2,pointRadius:3,pointBackgroundColor:'#5BA3C9'},{label:'Kamala',data:[132,133,132,134,135,134,126,122],borderColor:'#E07000',tension:0.3,borderWidth:2,pointRadius:3,pointBackgroundColor:'#E07000'},{label:'Cherngtalay',data:[120,121,122,123,125,126,127,128],borderColor:'#C97E4C',tension:0.3,borderWidth:2,pointRadius:3,pointBackgroundColor:'#C97E4C'}]},options:{...BASE,scales:{x:{grid:GRID,ticks:TICK},y:{grid:GRID,ticks:{...TICK,callback:v=>v+'k'}}}}});
+
+new Chart(document.getElementById('priceSegLine'),{type:'line',data:{labels:W,datasets:[{label:'Low',data:[68,69,69,70,71,71,72,72],borderColor:segC.low,tension:0.3,borderWidth:2,pointRadius:3,pointBackgroundColor:segC.low},{label:'Mid',data:[105,106,107,108,109,110,111,112],borderColor:segC.mid,tension:0.3,borderWidth:2,pointRadius:3,pointBackgroundColor:segC.mid},{label:'High',data:[140,141,143,144,145,146,147,148],borderColor:segC.high,tension:0.3,borderWidth:2,pointRadius:3,pointBackgroundColor:segC.high},{label:'Luxury',data:[202,204,206,208,210,211,211,210],borderColor:segC.lux,tension:0.3,borderWidth:2,pointRadius:3,pointBackgroundColor:segC.lux}]},options:{...BASE,scales:{x:{grid:GRID,ticks:TICK},y:{grid:GRID,ticks:{...TICK,callback:v=>v+'k'}}}}});
+
+new Chart(document.getElementById('priceTypeBar'),{type:'bar',data:{labels:['Condo','Villa','Townhouse'],datasets:[{label:'Min',data:[72,67,58],backgroundColor:'rgba(255,133,0,0.25)',borderRadius:3},{label:'Median',data:[148,185,92],backgroundColor:'rgba(255,133,0,0.75)',borderRadius:3},{label:'Max',data:[310,420,138],backgroundColor:'rgba(255,133,0,0.12)',borderRadius:3}]},options:{...BASE,scales:{x:{grid:GRID,ticks:TICK},y:{grid:GRID,ticks:{...TICK,callback:v=>v+'k'}}}}});
+
+new Chart(document.getElementById('velSegLine'),{type:'line',data:{labels:W,datasets:[{label:'Low',data:[5.2,5.3,5.4,5.5,5.6,5.7,5.6,5.8],borderColor:segC.low,tension:0.3,borderWidth:2,pointRadius:3,pointBackgroundColor:segC.low},{label:'Mid',data:[3.8,3.9,3.8,4.0,4.1,4.0,4.1,4.1],borderColor:segC.mid,tension:0.3,borderWidth:2,pointRadius:3,pointBackgroundColor:segC.mid},{label:'High',data:[3.4,3.3,3.2,3.3,3.2,3.1,3.2,3.2],borderColor:segC.high,tension:0.3,borderWidth:2,pointRadius:3,pointBackgroundColor:segC.high},{label:'Luxury',data:[1.8,1.7,1.6,1.5,1.6,1.4,1.6,1.2],borderColor:segC.lux,tension:0.3,borderWidth:2,pointRadius:3,pointBackgroundColor:segC.lux}]},options:{...BASE,scales:{x:{grid:GRID,ticks:TICK},y:{grid:GRID,ticks:{...TICK,callback:v=>v+'%'}}}}});
+
+new Chart(document.getElementById('absAreaRadar'),{type:'radar',data:{labels:['Bangtao','Rawai','Kamala','Cherngtalay','Ko Kaeo','Patong'],datasets:[{label:'Absorption %/mo',data:[5.2,3.8,2.5,4.1,2.9,1.8],borderColor:gold,backgroundColor:'rgba(255,133,0,0.12)',pointBackgroundColor:gold,borderWidth:2}]},options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return ' Absorption: '+ctx.parsed.r+'%/mo';}}}},scales:{r:{grid:{color:'rgba(255,255,255,0.08)'},ticks:{color:'#444444',font:{size:9},backdropColor:'transparent',callback:v=>v+'%'},pointLabels:{color:'#555555',font:{family:'IBM Plex Mono',size:11}}}}}});
+
+new Chart(document.getElementById('unitVelBar'),{type:'bar',data:{labels:W,datasets:[{label:'Studio',data:[18,20,17,22,19,21,22,24],backgroundColor:'rgba(91,163,201,0.8)',borderRadius:3},{label:'1BR',data:[28,30,29,32,31,30,33,31],backgroundColor:'rgba(224,112,0,0.8)',borderRadius:3},{label:'2BR',data:[18,19,18,20,19,20,19,18],backgroundColor:'rgba(255,133,0,0.8)',borderRadius:3},{label:'3BR+',data:[3,2,3,3,2,3,2,2],backgroundColor:'rgba(139,95,176,0.8)',borderRadius:3}]},options:{...BASE,plugins:{legend:LEG,tooltip:{callbacks:{label:function(ctx){const datasets=ctx.chart.data.datasets;const total=datasets.reduce((s,ds)=>s+(ds.data[ctx.dataIndex]||0),0);const pct=total>0?Math.round(ctx.parsed.y/total*100):0;return ' '+ctx.dataset.label+': '+ctx.parsed.y+'%/mo ('+pct+'% of mix)';}}}},scales:{x:{stacked:true,grid:GRID,ticks:TICK},y:{stacked:true,grid:GRID,ticks:TICK}}}});
+
+new Chart(document.getElementById('absRankChart'),{type:'bar',data:{labels:['Origin Plug&Play','Botanica Foresta','Mono Kata','Anchan Tropicana','Layan Sunhills','Skypark Ko Kaeo','Title Kamala Sea'],datasets:[{data:[7.2,5.9,5.1,3.4,3.2,2.9,2.5],backgroundColor:['#E07000','#E07000','rgba(255,133,0,0.75)','rgba(255,133,0,0.6)','rgba(255,133,0,0.4)','rgba(255,133,0,0.3)','#FF3B30'],borderRadius:3}]},options:{indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return ' Absorption: '+ctx.parsed.x+'%/mo';}}}},scales:{x:{grid:GRID,ticks:{...TICK,callback:v=>v+'%'}},y:{grid:{color:'rgba(255,255,255,0.02)'},ticks:{color:'#555555',font:{family:'IBM Plex Mono',size:11}}}}}});
+
+new Chart(document.getElementById('mapChart'),{type:'bar',data:{labels:['Bangtao','Rawai','Kamala','Cherngtalay','Ko Kaeo','Patong','Other'],datasets:[{label:'Projects',data:[89,72,54,41,28,18,15],backgroundColor:['#FF8500','#5BA3C9','#E07000','#C97E4C','#8B5FB0','#C94C6A','#6B7280'],borderRadius:4}]},options:{...BASE,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){const total=ctx.dataset.data.reduce((a,b)=>a+b,0);const pct=Math.round(ctx.parsed.y/total*100);return ' '+ctx.parsed.y+' projects ('+pct+'%)';}}},datalabels:{display:false}},scales:{x:{grid:GRID,ticks:TICK},y:{grid:GRID,ticks:{...TICK,callback:function(v){const total=317;return v+' ('+Math.round(v/total*100)+'%)';}}}}}});
+
+new Chart(document.getElementById('qualityChart'),{type:'bar',data:{labels:['0–20','20–40','40–60','60–80','80–100'],datasets:[{label:'Projects',data:[12,28,74,118,85],backgroundColor:['#FF3B30','#FF8C00','rgba(255,133,0,0.45)','rgba(255,133,0,0.7)','#E07000'],borderRadius:4}]},options:{...BASE,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){const total=ctx.dataset.data.reduce((a,b)=>a+b,0);const pct=Math.round(ctx.parsed.y/total*100);return ' DQS '+ctx.label+': '+ctx.parsed.y+' proj ('+pct+'%)';}}}}}});
+
+// ── PLATFORM CHARTS ──
+new Chart(document.getElementById('dash-typeDonut'),{type:'doughnut',data:{labels:['Condo','Villa','Townhouse','Mixed'],datasets:[{data:[285,16,12,4],backgroundColor:['#FF8500','#5BA3C9','#E07000','#8B5FB0'],borderWidth:0}]},options:{cutout:'62%',plugins:{legend:{position:'right',labels:{color:'#555555',font:{family:'IBM Plex Mono',size:11},padding:10,generateLabels:function(chart){const d=chart.data;const total=d.datasets[0].data.reduce((a,b)=>a+b,0);return d.labels.map((l,i)=>({text:l+' '+Math.round(d.datasets[0].data[i]/total*100)+'%',fillStyle:d.datasets[0].backgroundColor[i],strokeStyle:'transparent',index:i}));}}},tooltip:{callbacks:{label:function(ctx){const total=ctx.dataset.data.reduce((a,b)=>a+b,0);const pct=Math.round(ctx.parsed/total*100);return ' '+ctx.label+': '+ctx.parsed+' ('+pct+'%)';}}}}}});
+new Chart(document.getElementById('dash-launchBar'),{type:'bar',data:{labels:Q,datasets:[{label:'Launches',data:[8,12,9,14,11,16,13,18,4],backgroundColor:'rgba(255,133,0,0.7)',borderRadius:3}]},options:{...BASE,plugins:{legend:{display:false}}}});
+new Chart(document.getElementById('dash-completionBar'),{type:'bar',data:{labels:Q,datasets:[{label:'Completions',data:[4,6,8,12,9,14,11,20,6],backgroundColor:'rgba(224,112,0,0.7)',borderRadius:3}]},options:{...BASE,plugins:{legend:{display:false}}}});
+new Chart(document.getElementById('dash-gdvBar'),{type:'bar',data:{labels:['Low','Mid','High','Luxury'],datasets:[{label:'GDV (฿B)',data:[53.1,57.6,22.4,8.6],backgroundColor:[segC.low,segC.mid,segC.high,segC.lux],borderRadius:4}]},options:{...BASE,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){const total=ctx.dataset.data.reduce((a,b)=>a+b,0);const pct=Math.round(ctx.parsed.y/total*100);return ' GDV: ฿'+ctx.parsed.y+'B ('+pct+'% of total)';}}}}}});
+new Chart(document.getElementById('dash-salesLine'),{type:'line',data:{labels:['Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb'],datasets:[{label:'Total Units Sold/mo',data:[820,940,1020,1180,1240,980,860,1100,1300,1420,980,1100],borderColor:gold,backgroundColor:'rgba(255,133,0,0.08)',fill:true,tension:0.4,borderWidth:2,pointRadius:3}]},options:{...BASE}});
+new Chart(document.getElementById('dash-segTrend'),{type:'line',data:{labels:['Q1 24','Q2 24','Q3 24','Q4 24','Q1 25','Q2 25','Q3 25','Q4 25','Q1 26'],datasets:[{label:'Low',data:[30,28,27,26,26,25,26,26,26],borderColor:segC.low,tension:0.4,borderWidth:2,pointRadius:2},{label:'Mid',data:[34,35,35,36,35,36,36,35,35],borderColor:segC.mid,tension:0.4,borderWidth:2,pointRadius:2},{label:'High',data:[24,24,25,24,25,25,24,25,21],borderColor:segC.high,tension:0.4,borderWidth:2,pointRadius:2},{label:'Luxury',data:[12,13,13,14,14,14,14,14,12],borderColor:segC.lux,tension:0.4,borderWidth:2,pointRadius:2}]},options:{...BASE,plugins:{...BASE.plugins,tooltip:{callbacks:{label:function(ctx){return ' '+ctx.dataset.label+': '+ctx.parsed.y+'%';}}}},scales:{x:{grid:GRID,ticks:TICK},y:{grid:GRID,ticks:{...TICK,callback:v=>v+'%'}}}}});
+new Chart(document.getElementById('dash-segPriceLine'),{type:'line',data:{labels:W,datasets:[{label:'Low',data:[68,69,69,70,71,71,72,72],borderColor:segC.low,tension:0.3,borderWidth:2,pointRadius:2,pointBackgroundColor:segC.low},{label:'Mid',data:[105,106,107,108,109,110,111,112],borderColor:segC.mid,tension:0.3,borderWidth:2,pointRadius:2,pointBackgroundColor:segC.mid},{label:'High',data:[140,141,143,144,145,146,147,148],borderColor:segC.high,tension:0.3,borderWidth:2,pointRadius:2,pointBackgroundColor:segC.high},{label:'Luxury',data:[202,204,206,208,210,211,211,210],borderColor:segC.lux,tension:0.3,borderWidth:2,pointRadius:2,pointBackgroundColor:segC.lux}]},options:{...BASE,scales:{x:{grid:GRID,ticks:TICK},y:{grid:GRID,ticks:{...TICK,callback:v=>v+'k'}}}}});
+new Chart(document.getElementById('dash-unitDonut'),{type:'doughnut',data:{labels:['Studio','1BR','2BR','3BR+','Penthouse'],datasets:[{data:[5587,11795,9622,3104,932],backgroundColor:['#5BA3C9','#E07000','#FF8500','#8B5FB0','#C94C6A'],borderWidth:0}]},options:{cutout:'62%',plugins:{legend:{position:'right',labels:{color:'#555555',font:{family:'IBM Plex Mono',size:11},padding:8,generateLabels:function(chart){const d=chart.data;const total=d.datasets[0].data.reduce((a,b)=>a+b,0);return d.labels.map((l,i)=>({text:l+' '+Math.round(d.datasets[0].data[i]/total*100)+'%',fillStyle:d.datasets[0].backgroundColor[i],strokeStyle:'transparent',index:i}));}}},tooltip:{callbacks:{label:function(ctx){const total=ctx.dataset.data.reduce((a,b)=>a+b,0);const pct=Math.round(ctx.parsed/total*100);return ' '+ctx.label+': '+ctx.parsed.toLocaleString()+' units ('+pct+'%)';}}}}}});
+new Chart(document.getElementById('dash-velTrend'),{type:'line',data:{labels:['Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb'],datasets:[{label:'Low',data:[5.0,5.1,5.2,5.4,5.5,5.3,5.4,5.6,5.5,5.7,5.6,5.8],borderColor:segC.low,tension:0.4,borderWidth:2,pointRadius:2},{label:'Mid',data:[3.8,3.9,4.0,4.1,4.0,3.9,4.0,4.1,4.0,4.2,4.1,4.1],borderColor:segC.mid,tension:0.4,borderWidth:2,pointRadius:2},{label:'High',data:[3.2,3.3,3.2,3.4,3.3,3.2,3.3,3.1,3.2,3.3,3.2,3.2],borderColor:segC.high,tension:0.4,borderWidth:2,pointRadius:2},{label:'Luxury',data:[1.8,1.7,1.8,1.7,1.6,1.6,1.5,1.6,1.5,1.4,1.5,1.2],borderColor:segC.lux,tension:0.4,borderWidth:2,pointRadius:2}]},options:{...BASE,scales:{x:{grid:GRID,ticks:TICK},y:{grid:GRID,ticks:{...TICK,callback:v=>v+'%'}}}}});
+new Chart(document.getElementById('dash-unitSalesBar'),{type:'bar',data:{labels:['Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb'],datasets:[{label:'Studio',data:[120,140,130,160,155,120,115,140,165,180,130,140],backgroundColor:'rgba(91,163,201,0.8)',borderRadius:2},{label:'1BR',data:[280,320,350,400,420,330,290,370,440,480,330,370],backgroundColor:'rgba(224,112,0,0.8)',borderRadius:2},{label:'2BR',data:[180,200,210,240,250,200,180,220,260,290,200,230],backgroundColor:'rgba(255,133,0,0.8)',borderRadius:2},{label:'3BR+',data:[40,50,45,55,50,40,38,45,55,60,40,48],backgroundColor:'rgba(139,95,176,0.8)',borderRadius:2}]},options:{...BASE,plugins:{legend:LEG,tooltip:{callbacks:{label:function(ctx){const datasets=ctx.chart.data.datasets;const total=datasets.reduce((s,ds)=>s+ds.data[ctx.dataIndex],0);const pct=Math.round(ctx.parsed.y/total*100);return ' '+ctx.dataset.label+': '+ctx.parsed.y+' ('+pct+'%)';}}}},scales:{x:{stacked:true,grid:GRID,ticks:TICK},y:{stacked:true,grid:GRID,ticks:TICK}}}});
+new Chart(document.getElementById('dash-absRank'),{type:'bar',data:{labels:['Origin P&P','Mono Kata','Botanica Foresta','Anchan Tropicana','Layan Sunhills','Skypark Ko Kaeo','Title Kamala Sea','Laguna SkyPark'],datasets:[{data:[7.2,5.9,5.1,3.4,3.2,2.9,2.5,1.8],backgroundColor:['#E07000','#E07000','rgba(255,133,0,0.8)','rgba(255,133,0,0.6)','rgba(255,133,0,0.4)','rgba(255,133,0,0.3)','#FF3B30','#FF3B30'],borderRadius:3}]},options:{indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return ' Absorption: '+ctx.parsed.x+'%/mo';}}}},scales:{x:{grid:GRID,ticks:{...TICK,callback:v=>v+'%'}},y:{grid:{color:'rgba(255,255,255,0.02)'},ticks:{color:'#555555',font:{family:'IBM Plex Mono',size:11}}}}}});
+
+const fcastMonths=['Now','Mo 1','Mo 2','Mo 3','Mo 4','Mo 5','Mo 6','Mo 7','Mo 8','Mo 9','Mo 10','Mo 11','Mo 12'];
+new Chart(document.getElementById('dash-forecast'),{type:'line',data:{labels:fcastMonths,datasets:[{label:'Low forecast',data:[72,73,73,74,74,75,75,76,76,77,77,78,78],borderColor:segC.low,borderDash:[4,4],tension:0.4,borderWidth:2,pointRadius:0},{label:'Mid forecast',data:[112,113,114,115,116,117,118,119,120,121,122,123,124],borderColor:segC.mid,borderDash:[4,4],tension:0.4,borderWidth:2,pointRadius:0},{label:'High forecast',data:[148,150,151,153,154,156,157,159,160,162,163,165,166],borderColor:segC.high,borderDash:[4,4],tension:0.4,borderWidth:2,pointRadius:0},{label:'Luxury forecast',data:[210,210,211,211,212,212,213,213,214,214,215,215,216],borderColor:segC.lux,borderDash:[4,4],tension:0.4,borderWidth:2,pointRadius:0}]},options:{...BASE,scales:{x:{grid:GRID,ticks:TICK},y:{grid:GRID,ticks:{...TICK,callback:v=>v+'k'}}}}});
+new Chart(document.getElementById('dash-yield'),{type:'bar',data:{labels:['Bangtao','Rawai','Kamala','Cherngtalay','Ko Kaeo','Patong'],datasets:[{label:'Gross Yield %',data:[6.8,5.9,5.4,6.2,5.1,4.8],backgroundColor:'rgba(255,133,0,0.75)',borderRadius:4}]},options:{...BASE,plugins:{legend:{display:false}},scales:{x:{grid:GRID,ticks:TICK},y:{grid:GRID,ticks:{...TICK,callback:v=>v+'%'}}}}});
+
+// ── PROJECT PASSPORT ENGINE ──
+const PP_PROJECTS = [
+  {id:'origin-plug-play',name:'Origin Plug & Play',type:'Condo',district:'Bangtao',developer:'Origin Property Public Co., Ltd.',units:288,floors:8,freehold:true,status:'Selling',segment:'Mid',launched:'15 Jan 2024',completion:'1 Sep 2026',monthsSelling:26,dqs:87,trustIndex:89,absorption:7.2,available:41,sold:247,psm:103000,psmDelta:500,snaps:['Jan 24','Mar 24','Jun 24','Sep 24','Dec 24','Feb 25','May 25','Mar 26'],psmHistory:[94000,96500,99000,101000,101500,102000,102500,103000],availHistory:[288,261,198,142,94,72,58,41],soldHistory:[0,27,90,146,194,216,230,247],insight:'За 26 месяцев ценовой рост +9.6% (94k→103k ฿/sqm). Absorption 7.2%/мес — выше медианы сегмента Mid (4.1%). 41 юнит распродан за ~2 месяца. Segment boundary риск: отсутствует, confidence 0.91.',units_sample:[{ref:'A-301',type:'1BR',floor:3,area:68.5,view:'pool',own:'leasehold',price:9800000},{ref:'A-802',type:'1BR',floor:8,area:68.5,view:'sea',own:'leasehold',price:10400000},{ref:'B-501',type:'2BR',floor:5,area:98.0,view:'garden',own:'freehold',price:16200000},{ref:'B-1101',type:'2BR',floor:11,area:102.0,view:'sea',own:'freehold',price:18900000,flag:'promo'},{ref:'C-Ph1',type:'Penthouse',floor:8,area:220.0,view:'sea+pool',own:'freehold',price:42000000}]},
+  {id:'mono-kata',name:'Mono Kata',type:'Condo',district:'Kata',developer:'Mono Development Co., Ltd.',units:198,floors:7,freehold:true,status:'Selling',segment:'Mid',launched:'1 Mar 2024',completion:'1 Dec 2026',monthsSelling:24,dqs:81,trustIndex:76,absorption:5.9,available:62,sold:136,psm:98000,psmDelta:800,snaps:['Mar 24','Jun 24','Sep 24','Dec 24','Mar 25','Jun 25','Sep 25','Mar 26'],psmHistory:[88000,90000,92000,93500,95000,96000,97200,98000],availHistory:[198,185,164,143,120,100,82,62],soldHistory:[0,13,34,55,78,98,116,136],insight:'Mono Kata: стабильный рост PSM +11.4% за 24 мес. Absorption 5.9%/мес стабильна. ~62 юнита — запас на 10–11 мес. Сильная локация Kata обеспечивает устойчивый спрос.',units_sample:[{ref:'A-201',type:'Studio',floor:2,area:35.0,view:'pool',own:'leasehold',price:4200000},{ref:'B-304',type:'1BR',floor:3,area:55.0,view:'sea',own:'freehold',price:7800000},{ref:'B-601',type:'2BR',floor:6,area:88.0,view:'sea',own:'freehold',price:11500000}]},
+  {id:'botanica-foresta',name:'Botanica Foresta',type:'Villa',district:'Cherngtalay',developer:'Botanica Luxury Phuket Co., Ltd.',units:42,floors:2,freehold:true,status:'Selling',segment:'Luxury',launched:'1 Jun 2023',completion:'1 Mar 2026',monthsSelling:33,dqs:79,trustIndex:82,absorption:5.1,available:14,sold:28,psm:145000,psmDelta:1200,snaps:['Jun 23','Sep 23','Dec 23','Mar 24','Jun 24','Sep 24','Dec 24','Mar 26'],psmHistory:[128000,130000,133000,136000,139000,141000,143000,145000],availHistory:[42,40,38,35,30,24,19,14],soldHistory:[0,2,4,7,12,18,23,28],insight:'Botanica Foresta — luxury villa с ростом +13.3%. Финальные 14 юнитов — дефицитный stock. Completion март 2026 создаёт срочность. Рекомендация: срочный контакт с покупателями в pipeline.',units_sample:[{ref:'V-07',type:'3BR Villa',floor:2,area:380.0,view:'garden',own:'freehold',price:58000000},{ref:'V-14',type:'4BR Villa',floor:2,area:520.0,view:'pool',own:'freehold',price:84000000}]},
+  {id:'anchan-tropicana',name:'Anchan Tropicana',type:'Villa',district:'Bangtao',developer:'Anchan Villas Co., Ltd.',units:24,floors:2,freehold:true,status:'Selling',segment:'High',launched:'1 Sep 2023',completion:'1 Jun 2026',monthsSelling:30,dqs:74,trustIndex:71,absorption:3.4,available:11,sold:13,psm:118000,psmDelta:500,snaps:['Sep 23','Dec 23','Mar 24','Jun 24','Sep 24','Dec 24','Mar 25','Mar 26'],psmHistory:[108000,110000,112000,113000,114000,115000,116500,118000],availHistory:[24,23,22,21,19,17,15,11],soldHistory:[0,1,2,3,5,7,9,13],insight:'Anchan Tropicana: умеренная скорость 3.4%/мес — типична для villa High-сегмента. Рост PSM +9.3%. 11 финальных юнитов, completion через 3 месяца.',units_sample:[{ref:'ANC-03',type:'3BR Villa',floor:2,area:310.0,view:'garden',own:'freehold',price:38500000},{ref:'ANC-09',type:'4BR Villa',floor:2,area:420.0,view:'pool',own:'freehold',price:52000000}]},
+  {id:'title-rawai',name:'The Title Rawai Phase 4',type:'Townhouse',district:'Rawai',developer:'Rhom Bho Property PLC',units:120,floors:3,freehold:false,status:'Selling',segment:'Low',launched:'1 Nov 2023',completion:'1 Aug 2026',monthsSelling:28,dqs:68,trustIndex:65,absorption:4.2,available:45,sold:75,psm:68000,psmDelta:300,snaps:['Nov 23','Feb 24','May 24','Aug 24','Nov 24','Feb 25','May 25','Mar 26'],psmHistory:[62000,63000,64000,65000,66000,66500,67200,68000],availHistory:[120,114,105,98,84,70,60,45],soldHistory:[0,6,15,22,36,50,60,75],insight:'Title Rawai Ph.4 — стабильный Low-сегмент, рост +9.7%. Townhouse формат обеспечивает спрос среди семейных покупателей. 45 юнитов = ~11 мес запаса при текущей скорости.',units_sample:[{ref:'TH-012',type:'2BR TH',floor:3,area:120.0,view:'garden',own:'leasehold',price:5800000},{ref:'TH-047',type:'3BR TH',floor:3,area:145.0,view:'pool',own:'leasehold',price:7200000}]}
+];
+let ppCharts={};
+function ppFilterType(){
+  const t=document.getElementById('pp-type-select').value;
+  const sel=document.getElementById('pp-project-select');
+  sel.innerHTML='<option value="">— Select Project —</option>';
+  PP_PROJECTS.filter(p=>!t||p.type===t).forEach(p=>{const o=document.createElement('option');o.value=p.id;o.textContent=p.name+' · '+p.district;sel.appendChild(o);});
+  document.getElementById('pp-content').innerHTML='<div class="container" style="padding-top:60px;text-align:center;opacity:0.4"><div style="font-family:'IBM Plex Mono',monospace;font-size:22px;margin-bottom:8px">Select a project above</div></div>';
+}
+function ppLoadProject(){
+  const id=document.getElementById('pp-project-select').value;
+  if(!id)return;
+  const p=PP_PROJECTS.find(x=>x.id===id);
+  if(!p)return;
+  Object.values(ppCharts).forEach(c=>{try{c.destroy()}catch(e){}});
+  ppCharts={};
+  const segKey=p.segment.toLowerCase();
+  const segColors={low:'#5BA3C9',mid:'#E07000',high:'#FF8500',luxury:'#8B5FB0'};
+  const sColor=segColors[segKey]||gold;
+  const projSold=Math.round((p.sold/p.units)*100);
+  const unitsHtml=p.units_sample.map(u=>`<tr><td class="mono">${u.ref}</td><td>${u.type}</td><td class="mono">${u.floor}</td><td class="mono">${u.area}</td><td>${u.view}</td><td><span style="${u.own==='freehold'?'color:#E8C97A;font-size:10px':'color:var(--muted);font-size:10px'}">${u.own}</span></td><td class="mono">${u.price.toLocaleString()}</td><td class="mono">${Math.round(u.price/u.area).toLocaleString()}</td><td>${u.flag?`<span style="color:#FCD34D;font-size:9px">${u.flag}</span>`:''}</td></tr>`).join('');
+  document.getElementById('pp-content').innerHTML=`<div class="container"><div style="display:flex;align-items:center;gap:12px;margin-bottom:24px"><div class="rule-box" style="flex:1;margin:0">Showing passport for: <strong style="color:var(--gold)">${p.name} · ${p.district} · ${p.type}</strong> &nbsp;·&nbsp; <span class="badge badge-sell">${p.status}</span> &nbsp;·&nbsp; <span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:2px 8px;border-radius:3px;background:${sColor}22;color:${sColor}"><span style="width:6px;height:6px;border-radius:50%;background:${sColor};display:inline-block"></span>${p.segment}</span> &nbsp;·&nbsp; DQS: <strong style="color:#4ADE80">${p.dqs}/100</strong></div></div>
+  <div class="section-label" style="margin-bottom:10px">Block A — Master Data</div>
+  <div class="chart-row cols-2" style="margin-bottom:18px">
+    <div class="chart-card" style="padding:18px 20px"><div class="chart-card-title" style="margin-bottom:12px">Identity &amp; Location</div><table class="data-table" style="font-size:11px"><tbody><tr><td style="color:var(--muted);width:45%">Developer</td><td><strong>${p.developer}</strong></td></tr><tr><td style="color:var(--muted)">District</td><td>${p.district}</td></tr><tr><td style="color:var(--muted)">Type</td><td>${p.type}</td></tr><tr><td style="color:var(--muted)">Total units</td><td class="mono">${p.units}</td></tr><tr><td style="color:var(--muted)">Floors</td><td class="mono">${p.floors}</td></tr><tr><td style="color:var(--muted)">Freehold</td><td>${p.freehold?'<span style="color:#4ADE80">✓ Yes</span>':'<span style="color:var(--muted)">Leasehold only</span>'}</td></tr><tr><td style="color:var(--muted)">Trust Index</td><td><strong style="color:var(--gold)">${p.trustIndex||'—'}${p.trustIndex?'%':''}</strong><span style="color:var(--muted);font-size:9px;margin-left:6px">manual · analyst</span></td></tr></tbody></table></div>
+    <div class="chart-card" style="padding:18px 20px"><div class="chart-card-title" style="margin-bottom:12px">Timeline &amp; Status</div><table class="data-table" style="font-size:11px"><tbody><tr><td style="color:var(--muted);width:45%">Status</td><td><span class="badge badge-sell">${p.status}</span></td></tr><tr><td style="color:var(--muted)">Sales launch</td><td>${p.launched}</td></tr><tr><td style="color:var(--muted)">Completion</td><td>${p.completion}</td></tr><tr><td style="color:var(--muted)">Months selling</td><td class="mono">${p.monthsSelling} mths</td></tr><tr><td style="color:var(--muted)">Sales contact</td><td><span style="color:#4ADE80">✓ Verified</span></td></tr></tbody></table></div>
+  </div>
+  <div class="section-label" style="margin-bottom:10px">Block B — Current Snapshot</div>
+  <div class="kpi-grid kpi-grid-5" style="margin-bottom:18px"><div class="kpi-card green"><div class="kpi-label">Median ฿/sqm</div><div class="kpi-value">${Math.round(p.psm/1000)}<span class="kpi-unit">k</span></div><div class="kpi-delta up">▲ +${p.psmDelta.toLocaleString()}</div></div><div class="kpi-card warn"><div class="kpi-label">Available</div><div class="kpi-value">${p.available}<span class="kpi-unit"> units</span></div><div class="kpi-delta flat">${100-projSold}% remaining</div></div><div class="kpi-card green"><div class="kpi-label">Sold</div><div class="kpi-value">${p.sold}<span class="kpi-unit"> units</span></div><div class="kpi-delta up">${projSold}% absorbed</div></div><div class="kpi-card"><div class="kpi-label">Absorption</div><div class="kpi-value">${p.absorption}<span class="kpi-unit">%/mo</span></div><div class="kpi-delta up">▲ vs seg avg</div></div><div class="kpi-card blue"><div class="kpi-label">DQS</div><div class="kpi-value">${p.dqs}</div><div class="kpi-delta flat">${p.dqs>=80?'Full passport':'Working'}</div></div></div>
+  <div class="chart-row cols-2" style="margin-bottom:18px"><div class="chart-card"><div class="chart-card-title">฿/sqm Price History</div><div class="chart-card-sub">Median ฿/sqm · ${p.monthsSelling} months</div><canvas id="pp-priceLine" style="max-height:190px"></canvas></div><div class="chart-card"><div class="chart-card-title">Inventory Depletion</div><div class="chart-card-sub">Available vs Sold over time</div><canvas id="pp-inventory" style="max-height:190px"></canvas></div></div>
+  <div class="section-label" style="margin-bottom:10px">Block C — Snapshot History</div>
+  <table class="data-table" style="margin-bottom:18px"><thead><tr><th>Date</th><th>Available / Total</th><th>Avail %</th><th>Sold</th><th>Sold %</th><th>Median ฿/sqm</th><th>Δ vs Prev</th><th>Δ %</th><th>Segment</th></tr></thead><tbody>${p.snaps.map((s,i)=>`<tr><td class="mono">${s}</td><td class="mono">${p.availHistory[i]} / ${p.units}</td><td class="mono" style="color:var(--muted)">${Math.round(p.availHistory[i]/p.units*100)}%</td><td class="mono">${p.soldHistory[i]}</td><td class="mono" style="color:#4ADE80">${Math.round(p.soldHistory[i]/p.units*100)}%</td><td class="mono">${p.psmHistory[i].toLocaleString()}</td><td class="mono ${i>0?'text-up':''}">${i>0?'+'+(p.psmHistory[i]-p.psmHistory[i-1]).toLocaleString():'— first'}</td><td class="mono" style="color:${i>0?'#4ADE80':'var(--muted)'}">${i>0?'+'+(((p.psmHistory[i]-p.psmHistory[i-1])/p.psmHistory[i-1])*100).toFixed(1)+'%':'—'}</td><td><span style="font-size:8px;padding:2px 6px;border-radius:3px;background:${sColor}22;color:${sColor}">${p.segment}</span></td></tr>`).join('')}</tbody></table>
+  <div class="anomaly-item good" style="margin-bottom:18px"><div class="anomaly-icon">🤖</div><div class="anomaly-text good"><strong>A4 Auto-Insight</strong> ${p.insight}</div></div>
+  <div class="section-label" style="margin-bottom:10px">Available Units (${p.available})</div>
+  <table class="data-table" style="margin-bottom:18px"><thead><tr><th>Unit ref</th><th>Type</th><th>Floor</th><th>Area sqm</th><th>View</th><th>Ownership</th><th>Price (฿)</th><th>฿/sqm</th><th>Flags</th></tr></thead><tbody>${unitsHtml}<tr><td colspan="9" class="text-muted small" style="text-align:center;padding:10px">… ${Math.max(0,p.available-p.units_sample.length)} more units · full list in PDF passport</td></tr></tbody></table>
+  <div class="divider"></div>
+  <div class="section-label" style="margin-bottom:10px">Data Quality Score — ${p.dqs} / 100</div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px"><div style="background:rgba(224,112,0,0.12);border:1px solid rgba(224,112,0,0.3);border-radius:5px;padding:12px 14px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Fresh price list &lt;14d</div><div style="color:#4ADE80;font-weight:700">+25 ✓</div></div><div style="background:rgba(224,112,0,0.12);border:1px solid rgba(224,112,0,0.3);border-radius:5px;padding:12px 14px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Unit breakdown</div><div style="color:#4ADE80;font-weight:700">+20 ✓</div></div><div style="background:rgba(224,112,0,0.12);border:1px solid rgba(224,112,0,0.3);border-radius:5px;padding:12px 14px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Developer verified</div><div style="color:#4ADE80;font-weight:700">+15 ✓</div></div><div style="${p.dqs>=80?'background:rgba(224,112,0,0.12);border:1px solid rgba(224,112,0,0.3)':'background:rgba(255,59,48,0.07);border:1px solid rgba(255,59,48,0.3)'};border-radius:5px;padding:12px 14px;display:flex;flex-direction:column;justify-content:center;align-items:center"><div style="font-size:18px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:${p.dqs>=80?'#4ADE80':'#F87171'}">${p.dqs}</div><div style="font-size:9px;color:var(--muted);text-align:center">Total</div></div></div>
+  <div class="rule-box"><strong>Score thresholds:</strong> 80–100 → Full passport · 60–79 → Working, minor gaps · 40–59 → Incomplete · 0–39 → Stub only</div>
+</div>`;
+  setTimeout(()=>{
+    ppCharts.price=new Chart(document.getElementById('pp-priceLine'),{type:'line',data:{labels:p.snaps,datasets:[{label:'Median ฿/sqm',data:p.psmHistory,borderColor:gold,backgroundColor:'rgba(255,133,0,0.06)',fill:true,tension:0.35,borderWidth:2,pointRadius:4,pointBackgroundColor:gold}]},options:{...BASE,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){const first=p.psmHistory[0];const pct=((ctx.parsed.y-first)/first*100).toFixed(1);const sign=pct>=0?'+':'';return ' ฿/sqm: '+ctx.parsed.y.toLocaleString()+' ('+sign+pct+'% vs launch)';}}}},scales:{x:{grid:GRID,ticks:TICK},y:{grid:GRID,ticks:{...TICK,callback:v=>(v/1000)+'k'}}}}});
+    ppCharts.inv=new Chart(document.getElementById('pp-inventory'),{type:'line',data:{labels:p.snaps,datasets:[{label:'Available',data:p.availHistory,borderColor:'#5BA3C9',backgroundColor:'rgba(91,163,201,0.07)',fill:true,tension:0.35,borderWidth:2,pointRadius:4,pointBackgroundColor:'#5BA3C9'},{label:'Sold',data:p.soldHistory,borderColor:segC.mid,backgroundColor:'rgba(224,112,0,0.07)',fill:true,tension:0.35,borderWidth:2,pointRadius:4,pointBackgroundColor:segC.mid}]},options:{...BASE,plugins:{...BASE.plugins,tooltip:{callbacks:{label:function(ctx){const pct=Math.round(ctx.parsed.y/p.units*100);return ' '+ctx.dataset.label+': '+ctx.parsed.y+' units ('+pct+'%)';}}}},scales:{x:{grid:GRID,ticks:TICK},y:{grid:GRID,ticks:{...TICK,callback:function(v){return v+' ('+Math.round(v/p.units*100)+'%)';}}}}}});
+  },50);
+}
+</script>
+</body>
+</html>

@@ -1196,7 +1196,7 @@ function ppFilterType(){
   const sel=document.getElementById('pp-project-select');
   sel.innerHTML='<option value="">'+(ppDataLoaded?'— Select Project —':'Loading…')+'</option>';
   PP_PROJECTS.filter(p=>!t||p.type===t).forEach(p=>{const o=document.createElement('option');o.value=p.id;o.textContent=p.name+' · '+p.district;sel.appendChild(o);});
-  document.getElementById('pp-content').innerHTML='<div class="container" style="padding-top:60px;text-align:center;opacity:0.4"><div style="font-family:'IBM Plex Mono',monospace;font-size:22px;margin-bottom:8px">Select a project above</div></div>';
+  document.getElementById("pp-content").innerHTML='<div class="container" style="padding-top:60px;text-align:center;opacity:0.4"><div style="font-size:22px;margin-bottom:8px">Select a project above</div></div>';
 }
 function ppLoadProject(){
   const id=document.getElementById('pp-project-select').value;

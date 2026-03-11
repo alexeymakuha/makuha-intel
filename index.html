@@ -819,13 +819,13 @@ select:focus { border-color: var(--green); }
         <option value="">— Select Type first —</option>
       </select>
     </div>
-    <div class="nav-meta">Project Passport · Live</div>
+    <div class="nav-meta">Project Passport · <span id="pp-load-status" style="color:var(--amber)">connecting…</span></div>
   </nav>
 
   <div id="pp-content">
     <div class="container" style="padding-top:60px;text-align:center;opacity:0.4">
-      <div style="font-family:'IBM Plex Mono',monospace;font-size:22px;margin-bottom:8px">Select a project type and project above</div>
-      <div style="font-size:12px;color:var(--muted)">Full passport will render here</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:22px;margin-bottom:8px">Loading live data from master database…</div>
+      <div style="font-size:12px;color:var(--muted)">Select type → project once loaded</div>
     </div>
   </div>
 </div><!-- end mode-passport -->
@@ -1051,6 +1051,7 @@ function switchMode(m){
   document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('mode-'+m).classList.add('active');
   event.target.classList.add('active');
+  if(m==='passport' && !ppDataLoaded) ppLoadData();
 }
 function showWeekly(id){
   document.querySelectorAll('#mode-weekly .panel').forEach(p=>p.classList.remove('active'));
@@ -1111,18 +1112,89 @@ new Chart(document.getElementById('dash-forecast'),{type:'line',data:{labels:fca
 new Chart(document.getElementById('dash-yield'),{type:'bar',data:{labels:['Bangtao','Rawai','Kamala','Cherngtalay','Ko Kaeo','Patong'],datasets:[{label:'Gross Yield %',data:[6.8,5.9,5.4,6.2,5.1,4.8],backgroundColor:'rgba(255,133,0,0.75)',borderRadius:4}]},options:{...BASE,plugins:{legend:{display:false}},scales:{x:{grid:GRID,ticks:TICK},y:{grid:GRID,ticks:{...TICK,callback:v=>v+'%'}}}}});
 
 // ── PROJECT PASSPORT ENGINE ──
-const PP_PROJECTS = [
-  {id:'origin-plug-play',name:'Origin Plug & Play',type:'Condo',district:'Bangtao',developer:'Origin Property Public Co., Ltd.',units:288,floors:8,freehold:true,status:'Selling',segment:'Mid',launched:'15 Jan 2024',completion:'1 Sep 2026',monthsSelling:26,dqs:87,trustIndex:89,absorption:7.2,available:41,sold:247,psm:103000,psmDelta:500,snaps:['Jan 24','Mar 24','Jun 24','Sep 24','Dec 24','Feb 25','May 25','Mar 26'],psmHistory:[94000,96500,99000,101000,101500,102000,102500,103000],availHistory:[288,261,198,142,94,72,58,41],soldHistory:[0,27,90,146,194,216,230,247],insight:'За 26 месяцев ценовой рост +9.6% (94k→103k ฿/sqm). Absorption 7.2%/мес — выше медианы сегмента Mid (4.1%). 41 юнит распродан за ~2 месяца. Segment boundary риск: отсутствует, confidence 0.91.',units_sample:[{ref:'A-301',type:'1BR',floor:3,area:68.5,view:'pool',own:'leasehold',price:9800000},{ref:'A-802',type:'1BR',floor:8,area:68.5,view:'sea',own:'leasehold',price:10400000},{ref:'B-501',type:'2BR',floor:5,area:98.0,view:'garden',own:'freehold',price:16200000},{ref:'B-1101',type:'2BR',floor:11,area:102.0,view:'sea',own:'freehold',price:18900000,flag:'promo'},{ref:'C-Ph1',type:'Penthouse',floor:8,area:220.0,view:'sea+pool',own:'freehold',price:42000000}]},
-  {id:'mono-kata',name:'Mono Kata',type:'Condo',district:'Kata',developer:'Mono Development Co., Ltd.',units:198,floors:7,freehold:true,status:'Selling',segment:'Mid',launched:'1 Mar 2024',completion:'1 Dec 2026',monthsSelling:24,dqs:81,trustIndex:76,absorption:5.9,available:62,sold:136,psm:98000,psmDelta:800,snaps:['Mar 24','Jun 24','Sep 24','Dec 24','Mar 25','Jun 25','Sep 25','Mar 26'],psmHistory:[88000,90000,92000,93500,95000,96000,97200,98000],availHistory:[198,185,164,143,120,100,82,62],soldHistory:[0,13,34,55,78,98,116,136],insight:'Mono Kata: стабильный рост PSM +11.4% за 24 мес. Absorption 5.9%/мес стабильна. ~62 юнита — запас на 10–11 мес. Сильная локация Kata обеспечивает устойчивый спрос.',units_sample:[{ref:'A-201',type:'Studio',floor:2,area:35.0,view:'pool',own:'leasehold',price:4200000},{ref:'B-304',type:'1BR',floor:3,area:55.0,view:'sea',own:'freehold',price:7800000},{ref:'B-601',type:'2BR',floor:6,area:88.0,view:'sea',own:'freehold',price:11500000}]},
-  {id:'botanica-foresta',name:'Botanica Foresta',type:'Villa',district:'Cherngtalay',developer:'Botanica Luxury Phuket Co., Ltd.',units:42,floors:2,freehold:true,status:'Selling',segment:'Luxury',launched:'1 Jun 2023',completion:'1 Mar 2026',monthsSelling:33,dqs:79,trustIndex:82,absorption:5.1,available:14,sold:28,psm:145000,psmDelta:1200,snaps:['Jun 23','Sep 23','Dec 23','Mar 24','Jun 24','Sep 24','Dec 24','Mar 26'],psmHistory:[128000,130000,133000,136000,139000,141000,143000,145000],availHistory:[42,40,38,35,30,24,19,14],soldHistory:[0,2,4,7,12,18,23,28],insight:'Botanica Foresta — luxury villa с ростом +13.3%. Финальные 14 юнитов — дефицитный stock. Completion март 2026 создаёт срочность. Рекомендация: срочный контакт с покупателями в pipeline.',units_sample:[{ref:'V-07',type:'3BR Villa',floor:2,area:380.0,view:'garden',own:'freehold',price:58000000},{ref:'V-14',type:'4BR Villa',floor:2,area:520.0,view:'pool',own:'freehold',price:84000000}]},
-  {id:'anchan-tropicana',name:'Anchan Tropicana',type:'Villa',district:'Bangtao',developer:'Anchan Villas Co., Ltd.',units:24,floors:2,freehold:true,status:'Selling',segment:'High',launched:'1 Sep 2023',completion:'1 Jun 2026',monthsSelling:30,dqs:74,trustIndex:71,absorption:3.4,available:11,sold:13,psm:118000,psmDelta:500,snaps:['Sep 23','Dec 23','Mar 24','Jun 24','Sep 24','Dec 24','Mar 25','Mar 26'],psmHistory:[108000,110000,112000,113000,114000,115000,116500,118000],availHistory:[24,23,22,21,19,17,15,11],soldHistory:[0,1,2,3,5,7,9,13],insight:'Anchan Tropicana: умеренная скорость 3.4%/мес — типична для villa High-сегмента. Рост PSM +9.3%. 11 финальных юнитов, completion через 3 месяца.',units_sample:[{ref:'ANC-03',type:'3BR Villa',floor:2,area:310.0,view:'garden',own:'freehold',price:38500000},{ref:'ANC-09',type:'4BR Villa',floor:2,area:420.0,view:'pool',own:'freehold',price:52000000}]},
-  {id:'title-rawai',name:'The Title Rawai Phase 4',type:'Townhouse',district:'Rawai',developer:'Rhom Bho Property PLC',units:120,floors:3,freehold:false,status:'Selling',segment:'Low',launched:'1 Nov 2023',completion:'1 Aug 2026',monthsSelling:28,dqs:68,trustIndex:65,absorption:4.2,available:45,sold:75,psm:68000,psmDelta:300,snaps:['Nov 23','Feb 24','May 24','Aug 24','Nov 24','Feb 25','May 25','Mar 26'],psmHistory:[62000,63000,64000,65000,66000,66500,67200,68000],availHistory:[120,114,105,98,84,70,60,45],soldHistory:[0,6,15,22,36,50,60,75],insight:'Title Rawai Ph.4 — стабильный Low-сегмент, рост +9.7%. Townhouse формат обеспечивает спрос среди семейных покупателей. 45 юнитов = ~11 мес запаса при текущей скорости.',units_sample:[{ref:'TH-012',type:'2BR TH',floor:3,area:120.0,view:'garden',own:'leasehold',price:5800000},{ref:'TH-047',type:'3BR TH',floor:3,area:145.0,view:'pool',own:'leasehold',price:7200000}]}
-];
+// Live data from Google Sheets
+const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/14WcfPYYNuaeXyBtOP5rHiW75WbbszFTbGqQ8b_hwj5g/export?format=csv&gid=0';
+
+let PP_PROJECTS = [];
+let ppDataLoaded = false;
+
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+  return lines.slice(1).map(line => {
+    const cols = [];
+    let cur = '', inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      if (line[i] === '"') { inQ = !inQ; }
+      else if (line[i] === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
+      else { cur += line[i]; }
+    }
+    cols.push(cur.trim());
+    const row = {};
+    headers.forEach((h, i) => { row[h] = (cols[i] || '').replace(/^"|"$/g, '').trim(); });
+    return row;
+  }).filter(r => r['Project Name'] && r['Project Name'].length > 0);
+}
+
+function sheetRowToProject(row) {
+  const name = row['Project Name'] || '';
+  const id = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const units = parseInt(row['Units']) || 0;
+  const minPrice = parseInt((row['Min Price (THB)'] || '0').replace(/,/g, '')) || 0;
+  const maxPrice = parseInt((row['Max Price (THB)'] || '0').replace(/,/g, '')) || 0;
+  const minSize = parseFloat((row['Min Size (SqM)'] || '0').replace(/,/g, '')) || 0;
+  const maxSize = parseFloat((row['Max Size (SqM)'] || '0').replace(/,/g, '')) || 0;
+  const floors = parseInt(row['Floors']) || 0;
+  const psm = (minPrice > 0 && minSize > 0) ? Math.round(minPrice / minSize) : 0;
+  return {
+    id, name,
+    type: row['Type'] || '—',
+    district: row['Sub-District'] || row['Beach'] || '—',
+    developer: row['Developer'] || '—',
+    units, floors,
+    freehold: (row['Ownership'] || '').toLowerCase().includes('freehold'),
+    status: row['Status'] || '—',
+    segment: row['Segment'] || 'Mid',
+    launched: row['Launch Date'] || '—',
+    completion: row['Completion'] || '—',
+    monthsSelling: 0,
+    dqs: parseInt(row['DQS']) || 50,
+    trustIndex: 0,
+    absorption: parseFloat(row['Absorption']) || 0,
+    available: parseInt(row['Available']) || 0,
+    sold: parseInt(row['Sold']) || 0,
+    psm, psmDelta: 0,
+    minPrice, maxPrice, minSize, maxSize,
+    unitTypes: row['Unit Types'] || '—',
+    beach: row['Beach'] || '—',
+    snaps: [], psmHistory: [], availHistory: [], soldHistory: [],
+    insight: row['AI Insight'] || 'Data loaded from master database. Snapshot history will appear after first A3 agent cycle.',
+    units_sample: []
+  };
+}
+
+async function ppLoadData() {
+  const statusEl = document.getElementById('pp-load-status');
+  if (statusEl) statusEl.textContent = 'Loading live data…';
+  try {
+    const resp = await fetch(SHEET_CSV_URL);
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const text = await resp.text();
+    const rows = parseCSV(text);
+    PP_PROJECTS = rows.map(sheetRowToProject);
+    ppDataLoaded = true;
+    if (statusEl) statusEl.textContent = '✓ ' + PP_PROJECTS.length + ' projects · live';
+    ppFilterType();
+  } catch(e) {
+    if (statusEl) statusEl.textContent = '⚠ ' + e.message;
+    console.error('Sheet fetch error:', e);
+  }
+}
 let ppCharts={};
 function ppFilterType(){
   const t=document.getElementById('pp-type-select').value;
   const sel=document.getElementById('pp-project-select');
-  sel.innerHTML='<option value="">— Select Project —</option>';
+  sel.innerHTML='<option value="">'+(ppDataLoaded?'— Select Project —':'Loading…')+'</option>';
   PP_PROJECTS.filter(p=>!t||p.type===t).forEach(p=>{const o=document.createElement('option');o.value=p.id;o.textContent=p.name+' · '+p.district;sel.appendChild(o);});
   document.getElementById('pp-content').innerHTML='<div class="container" style="padding-top:60px;text-align:center;opacity:0.4"><div style="font-family:'IBM Plex Mono',monospace;font-size:22px;margin-bottom:8px">Select a project above</div></div>';
 }
@@ -1133,22 +1205,31 @@ function ppLoadProject(){
   if(!p)return;
   Object.values(ppCharts).forEach(c=>{try{c.destroy()}catch(e){}});
   ppCharts={};
-  const segKey=p.segment.toLowerCase();
+  const segKey=(p.segment||'mid').toLowerCase();
   const segColors={low:'#5BA3C9',mid:'#E07000',high:'#FF8500',luxury:'#8B5FB0'};
-  const sColor=segColors[segKey]||gold;
-  const projSold=Math.round((p.sold/p.units)*100);
-  const unitsHtml=p.units_sample.map(u=>`<tr><td class="mono">${u.ref}</td><td>${u.type}</td><td class="mono">${u.floor}</td><td class="mono">${u.area}</td><td>${u.view}</td><td><span style="${u.own==='freehold'?'color:#E8C97A;font-size:10px':'color:var(--muted);font-size:10px'}">${u.own}</span></td><td class="mono">${u.price.toLocaleString()}</td><td class="mono">${Math.round(u.price/u.area).toLocaleString()}</td><td>${u.flag?`<span style="color:#FCD34D;font-size:9px">${u.flag}</span>`:''}</td></tr>`).join('');
-  document.getElementById('pp-content').innerHTML=`<div class="container"><div style="display:flex;align-items:center;gap:12px;margin-bottom:24px"><div class="rule-box" style="flex:1;margin:0">Showing passport for: <strong style="color:var(--gold)">${p.name} · ${p.district} · ${p.type}</strong> &nbsp;·&nbsp; <span class="badge badge-sell">${p.status}</span> &nbsp;·&nbsp; <span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:2px 8px;border-radius:3px;background:${sColor}22;color:${sColor}"><span style="width:6px;height:6px;border-radius:50%;background:${sColor};display:inline-block"></span>${p.segment}</span> &nbsp;·&nbsp; DQS: <strong style="color:#4ADE80">${p.dqs}/100</strong></div></div>
+  const sColor=segColors[segKey]||'#FF8500';
+  const projSold=p.units>0?Math.round(((p.sold||0)/p.units)*100):0;
+  const hasHistory=p.snaps&&p.snaps.length>0;
+  const hasSample=p.units_sample&&p.units_sample.length>0;
+  const unitsHtml=hasSample?p.units_sample.map(u=>`<tr><td class="mono">${u.ref}</td><td>${u.type}</td><td class="mono">${u.floor}</td><td class="mono">${u.area}</td><td>${u.view}</td><td><span style="${u.own==='freehold'?'color:#E8C97A;font-size:10px':'color:var(--muted);font-size:10px'}">${u.own}</span></td><td class="mono">${u.price.toLocaleString()}</td><td class="mono">${Math.round(u.price/u.area).toLocaleString()}</td><td>${u.flag?`<span style="color:#FCD34D;font-size:9px">${u.flag}</span>`:''}</td></tr>`).join(''):'<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:16px">Unit data pending — A3 agent next cycle</td></tr>';
+  document.getElementById('pp-content').innerHTML=`<div class="container"><div style="display:flex;align-items:center;gap:12px;margin-bottom:24px"><div class="rule-box" style="flex:1;margin:0">Showing passport for: <strong style="color:var(--gold)">${p.name} · ${p.district} · ${p.type}</strong> &nbsp;·&nbsp; <span class="badge badge-sell">${p.status}</span> &nbsp;·&nbsp; <span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:2px 8px;border-radius:3px;background:${sColor}22;color:${sColor}"><span style="width:6px;height:6px;border-radius:50%;background:${sColor};display:inline-block"></span>${p.segment||'—'}</span> &nbsp;·&nbsp; DQS: <strong style="color:#4ADE80">${p.dqs}/100</strong> &nbsp;·&nbsp; <span style="font-size:9px;color:var(--muted)">live · phuket_master_database</span></div></div>
   <div class="section-label" style="margin-bottom:10px">Block A — Master Data</div>
   <div class="chart-row cols-2" style="margin-bottom:18px">
     <div class="chart-card" style="padding:18px 20px"><div class="chart-card-title" style="margin-bottom:12px">Identity &amp; Location</div><table class="data-table" style="font-size:11px"><tbody><tr><td style="color:var(--muted);width:45%">Developer</td><td><strong>${p.developer}</strong></td></tr><tr><td style="color:var(--muted)">District</td><td>${p.district}</td></tr><tr><td style="color:var(--muted)">Type</td><td>${p.type}</td></tr><tr><td style="color:var(--muted)">Total units</td><td class="mono">${p.units}</td></tr><tr><td style="color:var(--muted)">Floors</td><td class="mono">${p.floors}</td></tr><tr><td style="color:var(--muted)">Freehold</td><td>${p.freehold?'<span style="color:#4ADE80">✓ Yes</span>':'<span style="color:var(--muted)">Leasehold only</span>'}</td></tr><tr><td style="color:var(--muted)">Trust Index</td><td><strong style="color:var(--gold)">${p.trustIndex||'—'}${p.trustIndex?'%':''}</strong><span style="color:var(--muted);font-size:9px;margin-left:6px">manual · analyst</span></td></tr></tbody></table></div>
     <div class="chart-card" style="padding:18px 20px"><div class="chart-card-title" style="margin-bottom:12px">Timeline &amp; Status</div><table class="data-table" style="font-size:11px"><tbody><tr><td style="color:var(--muted);width:45%">Status</td><td><span class="badge badge-sell">${p.status}</span></td></tr><tr><td style="color:var(--muted)">Sales launch</td><td>${p.launched}</td></tr><tr><td style="color:var(--muted)">Completion</td><td>${p.completion}</td></tr><tr><td style="color:var(--muted)">Months selling</td><td class="mono">${p.monthsSelling} mths</td></tr><tr><td style="color:var(--muted)">Sales contact</td><td><span style="color:#4ADE80">✓ Verified</span></td></tr></tbody></table></div>
   </div>
   <div class="section-label" style="margin-bottom:10px">Block B — Current Snapshot</div>
-  <div class="kpi-grid kpi-grid-5" style="margin-bottom:18px"><div class="kpi-card green"><div class="kpi-label">Median ฿/sqm</div><div class="kpi-value">${Math.round(p.psm/1000)}<span class="kpi-unit">k</span></div><div class="kpi-delta up">▲ +${p.psmDelta.toLocaleString()}</div></div><div class="kpi-card warn"><div class="kpi-label">Available</div><div class="kpi-value">${p.available}<span class="kpi-unit"> units</span></div><div class="kpi-delta flat">${100-projSold}% remaining</div></div><div class="kpi-card green"><div class="kpi-label">Sold</div><div class="kpi-value">${p.sold}<span class="kpi-unit"> units</span></div><div class="kpi-delta up">${projSold}% absorbed</div></div><div class="kpi-card"><div class="kpi-label">Absorption</div><div class="kpi-value">${p.absorption}<span class="kpi-unit">%/mo</span></div><div class="kpi-delta up">▲ vs seg avg</div></div><div class="kpi-card blue"><div class="kpi-label">DQS</div><div class="kpi-value">${p.dqs}</div><div class="kpi-delta flat">${p.dqs>=80?'Full passport':'Working'}</div></div></div>
+  <div class="kpi-grid kpi-grid-5" style="margin-bottom:18px">
+    <div class="kpi-card green"><div class="kpi-label">Min Price</div><div class="kpi-value" style="font-size:16px">${p.minPrice>0?(p.minPrice/1000000).toFixed(1)+'M':'—'}</div><div class="kpi-delta flat">฿ THB</div></div>
+    <div class="kpi-card warn"><div class="kpi-label">Max Price</div><div class="kpi-value" style="font-size:16px">${p.maxPrice>0?(p.maxPrice/1000000).toFixed(1)+'M':'—'}</div><div class="kpi-delta flat">฿ THB</div></div>
+    <div class="kpi-card"><div class="kpi-label">฿/sqm est.</div><div class="kpi-value" style="font-size:16px">${p.psm>0?Math.round(p.psm/1000)+'k':'—'}</div><div class="kpi-delta flat">min price / min size</div></div>
+    <div class="kpi-card"><div class="kpi-label">Size range</div><div class="kpi-value" style="font-size:14px">${p.minSize>0?p.minSize+'–'+p.maxSize+' sqm':'—'}</div><div class="kpi-delta flat">sqm</div></div>
+    <div class="kpi-card blue"><div class="kpi-label">DQS</div><div class="kpi-value">${p.dqs}</div><div class="kpi-delta flat">${p.dqs>=80?'Full':'Working'}</div></div>
+  </div>
+  ${hasHistory?`<div class="chart-row cols-2" style="margin-bottom:18px"><div class="chart-card"><div class="chart-card-title">฿/sqm Price History</div><div class="chart-card-sub">Median ฿/sqm over snapshots</div><canvas id="pp-priceLine" style="max-height:190px"></canvas></div><div class="chart-card"><div class="chart-card-title">Inventory Depletion</div><div class="chart-card-sub">Available vs Sold over time</div><canvas id="pp-inventory" style="max-height:190px"></canvas></div></div>`:'<div class="rule-box" style="margin-bottom:18px;color:var(--muted)">📊 Charts appear after first A3 agent snapshot cycle</div>'}
   <div class="chart-row cols-2" style="margin-bottom:18px"><div class="chart-card"><div class="chart-card-title">฿/sqm Price History</div><div class="chart-card-sub">Median ฿/sqm · ${p.monthsSelling} months</div><canvas id="pp-priceLine" style="max-height:190px"></canvas></div><div class="chart-card"><div class="chart-card-title">Inventory Depletion</div><div class="chart-card-sub">Available vs Sold over time</div><canvas id="pp-inventory" style="max-height:190px"></canvas></div></div>
   <div class="section-label" style="margin-bottom:10px">Block C — Snapshot History</div>
-  <table class="data-table" style="margin-bottom:18px"><thead><tr><th>Date</th><th>Available / Total</th><th>Avail %</th><th>Sold</th><th>Sold %</th><th>Median ฿/sqm</th><th>Δ vs Prev</th><th>Δ %</th><th>Segment</th></tr></thead><tbody>${p.snaps.map((s,i)=>`<tr><td class="mono">${s}</td><td class="mono">${p.availHistory[i]} / ${p.units}</td><td class="mono" style="color:var(--muted)">${Math.round(p.availHistory[i]/p.units*100)}%</td><td class="mono">${p.soldHistory[i]}</td><td class="mono" style="color:#4ADE80">${Math.round(p.soldHistory[i]/p.units*100)}%</td><td class="mono">${p.psmHistory[i].toLocaleString()}</td><td class="mono ${i>0?'text-up':''}">${i>0?'+'+(p.psmHistory[i]-p.psmHistory[i-1]).toLocaleString():'— first'}</td><td class="mono" style="color:${i>0?'#4ADE80':'var(--muted)'}">${i>0?'+'+(((p.psmHistory[i]-p.psmHistory[i-1])/p.psmHistory[i-1])*100).toFixed(1)+'%':'—'}</td><td><span style="font-size:8px;padding:2px 6px;border-radius:3px;background:${sColor}22;color:${sColor}">${p.segment}</span></td></tr>`).join('')}</tbody></table>
+  ${hasHistory?`<table class="data-table" style="margin-bottom:18px"><thead><tr><th>Date</th><th>Available / Total</th><th>Avail %</th><th>Sold</th><th>Sold %</th><th>Median ฿/sqm</th><th>Δ vs Prev</th><th>Δ %</th><th>Segment</th></tr></thead><tbody>${p.snaps.map((s,i)=>\`<tr><td class="mono">${s}</td><td class="mono">${p.availHistory[i]} / ${p.units}</td><td class="mono" style="color:var(--muted)">${Math.round(p.availHistory[i]/p.units*100)}%</td><td class="mono">${p.soldHistory[i]}</td><td class="mono" style="color:#4ADE80">${Math.round(p.soldHistory[i]/p.units*100)}%</td><td class="mono">${p.psmHistory[i].toLocaleString()}</td><td class="mono ${i>0?'text-up':''}">${i>0?'+'+(p.psmHistory[i]-p.psmHistory[i-1]).toLocaleString():'— first'}</td><td class="mono" style="color:${i>0?'#4ADE80':'var(--muted)'}">${i>0?'+'+(((p.psmHistory[i]-p.psmHistory[i-1])/p.psmHistory[i-1])*100).toFixed(1)+'%':'—'}</td><td><span style="font-size:8px;padding:2px 6px;border-radius:3px;background:${sColor}22;color:${sColor}">${p.segment}</span></td></tr>\`).join('')}</tbody></table>`:'<div class="rule-box" style="margin-bottom:18px;color:var(--muted)">No snapshot history yet — A3 agent will populate this after first monitoring cycle</div>'}
   <div class="anomaly-item good" style="margin-bottom:18px"><div class="anomaly-icon">🤖</div><div class="anomaly-text good"><strong>A4 Auto-Insight</strong> ${p.insight}</div></div>
   <div class="section-label" style="margin-bottom:10px">Available Units (${p.available})</div>
   <table class="data-table" style="margin-bottom:18px"><thead><tr><th>Unit ref</th><th>Type</th><th>Floor</th><th>Area sqm</th><th>View</th><th>Ownership</th><th>Price (฿)</th><th>฿/sqm</th><th>Flags</th></tr></thead><tbody>${unitsHtml}<tr><td colspan="9" class="text-muted small" style="text-align:center;padding:10px">… ${Math.max(0,p.available-p.units_sample.length)} more units · full list in PDF passport</td></tr></tbody></table>
@@ -1157,10 +1238,12 @@ function ppLoadProject(){
   <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px"><div style="background:rgba(224,112,0,0.12);border:1px solid rgba(224,112,0,0.3);border-radius:5px;padding:12px 14px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Fresh price list &lt;14d</div><div style="color:#4ADE80;font-weight:700">+25 ✓</div></div><div style="background:rgba(224,112,0,0.12);border:1px solid rgba(224,112,0,0.3);border-radius:5px;padding:12px 14px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Unit breakdown</div><div style="color:#4ADE80;font-weight:700">+20 ✓</div></div><div style="background:rgba(224,112,0,0.12);border:1px solid rgba(224,112,0,0.3);border-radius:5px;padding:12px 14px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Developer verified</div><div style="color:#4ADE80;font-weight:700">+15 ✓</div></div><div style="${p.dqs>=80?'background:rgba(224,112,0,0.12);border:1px solid rgba(224,112,0,0.3)':'background:rgba(255,59,48,0.07);border:1px solid rgba(255,59,48,0.3)'};border-radius:5px;padding:12px 14px;display:flex;flex-direction:column;justify-content:center;align-items:center"><div style="font-size:18px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:${p.dqs>=80?'#4ADE80':'#F87171'}">${p.dqs}</div><div style="font-size:9px;color:var(--muted);text-align:center">Total</div></div></div>
   <div class="rule-box"><strong>Score thresholds:</strong> 80–100 → Full passport · 60–79 → Working, minor gaps · 40–59 → Incomplete · 0–39 → Stub only</div>
 </div>`;
+  if(hasHistory){
   setTimeout(()=>{
     ppCharts.price=new Chart(document.getElementById('pp-priceLine'),{type:'line',data:{labels:p.snaps,datasets:[{label:'Median ฿/sqm',data:p.psmHistory,borderColor:gold,backgroundColor:'rgba(255,133,0,0.06)',fill:true,tension:0.35,borderWidth:2,pointRadius:4,pointBackgroundColor:gold}]},options:{...BASE,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){const first=p.psmHistory[0];const pct=((ctx.parsed.y-first)/first*100).toFixed(1);const sign=pct>=0?'+':'';return ' ฿/sqm: '+ctx.parsed.y.toLocaleString()+' ('+sign+pct+'% vs launch)';}}}},scales:{x:{grid:GRID,ticks:TICK},y:{grid:GRID,ticks:{...TICK,callback:v=>(v/1000)+'k'}}}}});
     ppCharts.inv=new Chart(document.getElementById('pp-inventory'),{type:'line',data:{labels:p.snaps,datasets:[{label:'Available',data:p.availHistory,borderColor:'#5BA3C9',backgroundColor:'rgba(91,163,201,0.07)',fill:true,tension:0.35,borderWidth:2,pointRadius:4,pointBackgroundColor:'#5BA3C9'},{label:'Sold',data:p.soldHistory,borderColor:segC.mid,backgroundColor:'rgba(224,112,0,0.07)',fill:true,tension:0.35,borderWidth:2,pointRadius:4,pointBackgroundColor:segC.mid}]},options:{...BASE,plugins:{...BASE.plugins,tooltip:{callbacks:{label:function(ctx){const pct=Math.round(ctx.parsed.y/p.units*100);return ' '+ctx.dataset.label+': '+ctx.parsed.y+' units ('+pct+'%)';}}}},scales:{x:{grid:GRID,ticks:TICK},y:{grid:GRID,ticks:{...TICK,callback:function(v){return v+' ('+Math.round(v/p.units*100)+'%)';}}}}}});
   },50);
+  }
 }
 </script>
 </body>

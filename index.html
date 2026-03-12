@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAFgUlEQVR4nL2Xa2hc1xGAvzn3Xunesw/JsiyUWpCWGINJ2ygpNCH5EQKOA6EY/MMlpKGQhw2NIFaCiiFQVNWOa2KDcUgd7NgU+vhhWuiDlGIc/wiJoTiu4zjNE+q4LnZsabUr7d1dXe3jTH+stIkiy5ZUJwPn13nMd2bOnJkRmhJGUfRzEXkMuAWQmXEzRQFV1VERORpF0c/Gx8djAWwURX8yxmxQ1dZqEcEYQ6PR+L+0ep6Hc44vn62qJ4Mg+IFEUbTbGLNdVWuAb4yIMR5JklCtVkmlUnM2L0VEhHK5TFtbG2EY4pzDOadAXUQC59yrBnhSVR3gi4hUpqYpFov0re5laPAJarV667ClKAao1eoMDT5B3+peisUilcoU0pwMVNWJyGO+iHQDGGNIkoQfP7qRe77/Xb5z+1rueedOEGHvviNks1nq9fqiADzPo1gsMvTsk+x5YYhNG9dz7l8f8+57n3D4138gDNtxTg0QYa1Va61mMhkF9NUDO1Srn+jlf7+hFz46oROfndJNGx9UQLPZrM6uX2hks1kFdNPGB3Xis1N64aMTevn8G6rTH+vR3+5TQDOZ9Ox6Z75MXy5PMZErUK3V8DxDZSph/97n6b9jHXFcwve9BW/u+x5xXKL/jnXs3/s8lakEzzNUq3XyuQKlcmWet+YBGGPwfQ8RQUSoVmtYG3L4wA56VnUxPV3FmHnbMMYwPV2lZ1UXhw/swNqQarXWOsf3vWvvW+g2qornGcKwjWKxxNo1t/LKS8OoKqo651HOhBWqyisvDbN2zTcpFktEYTue5103iq4JoEAQBIzlCly6PEo2k2IsV+Ch9fexc3gb5XJ5zm2MaYbbzuFtPLT+PsZyeTqyaS5cvMSlS1dpawtgAYhrA6ji+x6TkzEDgzsplStYGzE6lufprY/w1OObieMY3/fxfZ84LvHU45t5eusjjI7lsTaiVJ7iJ8/8glx+giDwF9K/sAsaDUcmk+bU6XNsG9pNFLVjjKEwUWTXyCAP3H83cVwijks8cP/d7BoZpDBRxBhDFLaz7ae/5MzZ9+nIpnHOLc0FLYh6g+7uFfzltdfZ9eIhuld2UqvVUVUOvjxC3+pe+lb3cvDlEVSVWq1O98pOXthziD//9TgdHTf+O/zrzgL1Wh1rLS/uO8Ka227l0R8+zJXRcXpWdXHoVyMA9KzqIjc+QW/PSn5/9G/s2XeEdCpFvX7jPHJDgJkURhSGPLd9N7d9q4/v3Xk7+cIkd/WvAyBfmKS7q5N/vH2O57bvJgpDFps9ruuCFoQqQeCTJFW2DAxz5WoOG4WteRuFXLmaY+vAMElSxfd9mjnnJgFA81FaG3H+04tsGRjG2ogz73zAmbMfYG3EloFhzn96kZSNlpTCb+iCL0q9XieTSfPmydNs/tGznDn7IQB39a/jzZOnyWTS1BaZsJYFAE1LpNMpjh1/izBsB+DY8bdIp1M0GguH200DAHDOkcmkWn7OZJanfNkAwByFjcbyKiZYwiP8quRrAXAoboGfYdkuWKwIkCEgIPj6AYTmT/qa/IduSRFcw+DzAJxzNBqNmbG8lw3gxJGmnRPuvxxzMZ0uol9j2vDnuGMegLURK1Z0EAQBlXKybAAUVJRvZFZwS6fPyrYU3RYcjs9t8wWAZgnm8c933if7xxTTSZVCoYhzbkk9wax4YpiiQXziPN/+0CfrT3H17QuoJ4hqywZirc0DHYCIiCTJNI3G7HcqWBst3wpApTJFgGlGghFsFM7WiA6oi7V2v4g8M9OaBcZI68aqXLeaWYwYY1BRQJDPz6vNtGa/k66urmySJH8XkXuX2wMuVUQE59xZz/M2mHw+X2xvb39YVQ8Ck8zUIF+RbgVi59xvPM/bUCqVxv4Hkud78E34my0AAAAASUVORK5CYII=">
+<meta name="version" content="43143dbd-fix">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Phuket Market Intelligence Platform</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -1112,73 +1114,89 @@ new Chart(document.getElementById('dash-forecast'),{type:'line',data:{labels:fca
 new Chart(document.getElementById('dash-yield'),{type:'bar',data:{labels:['Bangtao','Rawai','Kamala','Cherngtalay','Ko Kaeo','Patong'],datasets:[{label:'Gross Yield %',data:[6.8,5.9,5.4,6.2,5.1,4.8],backgroundColor:'rgba(255,133,0,0.75)',borderRadius:4}]},options:{...BASE,plugins:{legend:{display:false}},scales:{x:{grid:GRID,ticks:TICK},y:{grid:GRID,ticks:{...TICK,callback:v=>v+'%'}}}}});
 
 // ── PROJECT PASSPORT ENGINE ──
-// Live data from Supabase
-const SUPABASE_URL  = 'https://xfnknafkgmhxsygsfbbi.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhmbmtuYWZrZ21oeHN5Z3NmYmJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxNDg1NTgsImV4cCI6MjA4ODcyNDU1OH0.vUcTCYLcfzX4PI4HhQ6oezFTdptamgqc5kEm8lLqi7M';
+// Live data from Google Sheets
+const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/14WcfPYYNuaeXyBtOP5rHiW75WbbszFTbGqQ8b_hwj5g/export?format=csv&gid=0';
 
 let PP_PROJECTS = [];
 let ppDataLoaded = false;
 
-function supabaseRowToProject(row) {
-  const name = row.raw_name || '';
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+  return lines.slice(1).map(line => {
+    const cols = [];
+    let cur = '', inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      if (line[i] === '"') { inQ = !inQ; }
+      else if (line[i] === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
+      else { cur += line[i]; }
+    }
+    cols.push(cur.trim());
+    const row = {};
+    headers.forEach((h, i) => { row[h] = (cols[i] || '').replace(/^"|"$/g, '').trim(); });
+    return row;
+  }).filter(r => r['Project Name'] && r['Project Name'].length > 0);
+}
+
+function sheetRowToProject(row) {
+  const name = row['Project Name'] || '';
   const id = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-  const minPrice = row.raw_price_min || 0;
-  const maxPrice = row.raw_price_max || 0;
-  const minSize  = row.raw_size_min  || 0;
-  const maxSize  = row.raw_size_max  || 0;
+  const units = parseInt(row['Units']) || 0;
+  const minPrice = parseInt((row['Min Price (THB)'] || '0').replace(/,/g, '')) || 0;
+  const maxPrice = parseInt((row['Max Price (THB)'] || '0').replace(/,/g, '')) || 0;
+  const minSize = parseFloat((row['Min Size (SqM)'] || '0').replace(/,/g, '')) || 0;
+  const maxSize = parseFloat((row['Max Size (SqM)'] || '0').replace(/,/g, '')) || 0;
+  const floors = parseInt(row['Floors']) || 0;
   const psm = (minPrice > 0 && minSize > 0) ? Math.round(minPrice / minSize) : 0;
   return {
     id, name,
-    type:        row.raw_type         || '—',
-    district:    row.raw_sub_district || row.raw_beach || '—',
-    developer:   row.raw_developer    || '—',
-    units:       row.raw_units_total  || 0,
-    floors:      row.raw_floors       || 0,
-    freehold:    false,
-    status:      row.status           || '—',
-    segment:     'Mid',
-    launched:    '—',
-    completion:  row.raw_completion   || '—',
+    type: row['Type'] || '—',
+    district: row['Sub-District'] || row['Beach'] || '—',
+    developer: row['Developer'] || '—',
+    units, floors,
+    freehold: (row['Ownership'] || '').toLowerCase().includes('freehold'),
+    status: row['Status'] || '—',
+    segment: row['Segment'] || 'Mid',
+    launched: row['Launch Date'] || '—',
+    completion: row['Completion'] || '—',
     monthsSelling: 0,
-    dqs:         row.data_quality_score || 50,
-    trustIndex:  0, absorption: 0, available: 0, sold: 0,
-    psm, psmDelta: 0, minPrice, maxPrice, minSize, maxSize,
-    unitTypes:   row.raw_unit_types   || '—',
-    beach:       row.raw_beach        || '—',
-    lat:         row.lat, lng: row.lng,
-    salesKit:    row.raw_sales_kit_url || null,
-    syncedAt:    row.synced_at        || null,
+    dqs: parseInt(row['DQS']) || 50,
+    trustIndex: 0,
+    absorption: parseFloat(row['Absorption']) || 0,
+    available: parseInt(row['Available']) || 0,
+    sold: parseInt(row['Sold']) || 0,
+    psm, psmDelta: 0,
+    minPrice, maxPrice, minSize, maxSize,
+    unitTypes: row['Unit Types'] || '—',
+    beach: row['Beach'] || '—',
     snaps: [], psmHistory: [], availHistory: [], soldHistory: [],
-    insight: 'Данные загружены из Supabase. История снапшотов появится после первого цикла агента A3.',
+    insight: row['AI Insight'] || 'Data loaded from master database. Snapshot history will appear after first A3 agent cycle.',
     units_sample: []
   };
 }
 
 async function ppLoadData() {
   const statusEl = document.getElementById('pp-load-status');
-  if (statusEl) statusEl.textContent = 'Loading from Supabase…';
+  if (statusEl) statusEl.textContent = 'Loading live data…';
   try {
-    const resp = await fetch(
-      `${SUPABASE_URL}/rest/v1/projects?select=*&order=sheet_no.asc`,
-      { headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` } }
-    );
+    const resp = await fetch(SHEET_CSV_URL);
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
-    const rows = await resp.json();
-    PP_PROJECTS = rows.filter(r => r.raw_name).map(supabaseRowToProject);
+    const text = await resp.text();
+    const rows = parseCSV(text);
+    PP_PROJECTS = rows.map(sheetRowToProject);
     ppDataLoaded = true;
-    if (statusEl) statusEl.textContent = `✓ ${PP_PROJECTS.length} projects · Supabase · live`;
+    if (statusEl) statusEl.textContent = '✓ ' + PP_PROJECTS.length + ' projects · live';
     ppFilterType();
   } catch(e) {
-    if (statusEl) statusEl.textContent = '⚠ Supabase error: ' + e.message;
-    console.error('Supabase fetch error:', e);
+    if (statusEl) statusEl.textContent = '⚠ ' + e.message;
+    console.error('Sheet fetch error:', e);
   }
 }
-
 let ppCharts={};
 function ppFilterType(){
   const t=document.getElementById('pp-type-select').value;
   const sel=document.getElementById('pp-project-select');
-  sel.innerHTML='<option value="">— Select Project —</option>';
+  sel.innerHTML='<option value="">'+(ppDataLoaded?'— Select Project —':'Loading…')+'</option>';
   PP_PROJECTS.filter(p=>!t||p.type===t).forEach(p=>{const o=document.createElement('option');o.value=p.id;o.textContent=p.name+' · '+p.district;sel.appendChild(o);});
   document.getElementById("pp-content").innerHTML='<div class="container" style="padding-top:60px;text-align:center;opacity:0.4"><div style="font-size:22px;margin-bottom:8px">Select a project above</div></div>';
 }
@@ -1195,24 +1213,25 @@ function ppLoadProject(){
   const projSold=p.units>0?Math.round(((p.sold||0)/p.units)*100):0;
   const hasHistory=p.snaps&&p.snaps.length>0;
   const hasSample=p.units_sample&&p.units_sample.length>0;
-  const unitsHtml=hasSample?p.units_sample.map(u=>`<tr><td class="mono">${u.ref}</td><td>${u.type}</td><td class="mono">${u.floor}</td><td class="mono">${u.area}</td><td>${u.view}</td><td><span style="${u.own==='freehold'?'color:#E8C97A;font-size:10px':'color:var(--muted);font-size:10px'}">${u.own}</span></td><td class="mono">${u.price.toLocaleString()}</td><td class="mono">${Math.round(u.price/u.area).toLocaleString()}</td><td>${u.flag?`<span style="color:#FCD34D;font-size:9px">${u.flag}</span>`:''}</td></tr>`).join(''):'<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:16px">Unit-level data pending — A3 agent next cycle</td></tr>';
+  const unitsHtml=hasSample?p.units_sample.map(u=>`<tr><td class="mono">${u.ref}</td><td>${u.type}</td><td class="mono">${u.floor}</td><td class="mono">${u.area}</td><td>${u.view}</td><td><span style="${u.own==='freehold'?'color:#E8C97A;font-size:10px':'color:var(--muted);font-size:10px'}">${u.own}</span></td><td class="mono">${u.price.toLocaleString()}</td><td class="mono">${Math.round(u.price/u.area).toLocaleString()}</td><td>${u.flag?`<span style="color:#FCD34D;font-size:9px">${u.flag}</span>`:''}</td></tr>`).join(''):'<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:16px">Unit data pending — A3 agent next cycle</td></tr>';
   document.getElementById('pp-content').innerHTML=`<div class="container"><div style="display:flex;align-items:center;gap:12px;margin-bottom:24px"><div class="rule-box" style="flex:1;margin:0">Showing passport for: <strong style="color:var(--gold)">${p.name} · ${p.district} · ${p.type}</strong> &nbsp;·&nbsp; <span class="badge badge-sell">${p.status}</span> &nbsp;·&nbsp; <span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:2px 8px;border-radius:3px;background:${sColor}22;color:${sColor}"><span style="width:6px;height:6px;border-radius:50%;background:${sColor};display:inline-block"></span>${p.segment||'—'}</span> &nbsp;·&nbsp; DQS: <strong style="color:#4ADE80">${p.dqs}/100</strong> &nbsp;·&nbsp; <span style="font-size:9px;color:var(--muted)">live · phuket_master_database</span></div></div>
   <div class="section-label" style="margin-bottom:10px">Block A — Master Data</div>
   <div class="chart-row cols-2" style="margin-bottom:18px">
-    <div class="chart-card" style="padding:18px 20px"><div class="chart-card-title" style="margin-bottom:12px">Identity &amp; Location</div><table class="data-table" style="font-size:11px"><tbody><tr><td style="color:var(--muted);width:45%">Developer</td><td><strong>${p.developer||'—'}</strong></td></tr><tr><td style="color:var(--muted)">Sub-District</td><td>${p.district||'—'}</td></tr><tr><td style="color:var(--muted)">Beach</td><td>${p.beach||'—'}</td></tr><tr><td style="color:var(--muted)">Type</td><td>${p.type||'—'}</td></tr><tr><td style="color:var(--muted)">Unit Types</td><td>${p.unitTypes||'—'}</td></tr><tr><td style="color:var(--muted)">Total units</td><td class="mono">${p.units||'—'}</td></tr><tr><td style="color:var(--muted)">Floors</td><td class="mono">${p.floors||'—'}</td></tr><tr><td style="color:var(--muted)">Ownership</td><td>${p.freehold?'<span style="color:#4ADE80">✓ Freehold</span>':'<span style="color:var(--muted)">Leasehold</span>'}</td></tr></tbody></table></div>
+    <div class="chart-card" style="padding:18px 20px"><div class="chart-card-title" style="margin-bottom:12px">Identity &amp; Location</div><table class="data-table" style="font-size:11px"><tbody><tr><td style="color:var(--muted);width:45%">Developer</td><td><strong>${p.developer}</strong></td></tr><tr><td style="color:var(--muted)">District</td><td>${p.district}</td></tr><tr><td style="color:var(--muted)">Type</td><td>${p.type}</td></tr><tr><td style="color:var(--muted)">Total units</td><td class="mono">${p.units}</td></tr><tr><td style="color:var(--muted)">Floors</td><td class="mono">${p.floors}</td></tr><tr><td style="color:var(--muted)">Freehold</td><td>${p.freehold?'<span style="color:#4ADE80">✓ Yes</span>':'<span style="color:var(--muted)">Leasehold only</span>'}</td></tr><tr><td style="color:var(--muted)">Trust Index</td><td><strong style="color:var(--gold)">${p.trustIndex||'—'}${p.trustIndex?'%':''}</strong><span style="color:var(--muted);font-size:9px;margin-left:6px">manual · analyst</span></td></tr></tbody></table></div>
     <div class="chart-card" style="padding:18px 20px"><div class="chart-card-title" style="margin-bottom:12px">Timeline &amp; Status</div><table class="data-table" style="font-size:11px"><tbody><tr><td style="color:var(--muted);width:45%">Status</td><td><span class="badge badge-sell">${p.status}</span></td></tr><tr><td style="color:var(--muted)">Sales launch</td><td>${p.launched}</td></tr><tr><td style="color:var(--muted)">Completion</td><td>${p.completion}</td></tr><tr><td style="color:var(--muted)">Months selling</td><td class="mono">${p.monthsSelling} mths</td></tr><tr><td style="color:var(--muted)">Sales contact</td><td><span style="color:#4ADE80">✓ Verified</span></td></tr></tbody></table></div>
   </div>
   <div class="section-label" style="margin-bottom:10px">Block B — Current Snapshot</div>
   <div class="kpi-grid kpi-grid-5" style="margin-bottom:18px">
     <div class="kpi-card green"><div class="kpi-label">Min Price</div><div class="kpi-value" style="font-size:16px">${p.minPrice>0?(p.minPrice/1000000).toFixed(1)+'M':'—'}</div><div class="kpi-delta flat">฿ THB</div></div>
     <div class="kpi-card warn"><div class="kpi-label">Max Price</div><div class="kpi-value" style="font-size:16px">${p.maxPrice>0?(p.maxPrice/1000000).toFixed(1)+'M':'—'}</div><div class="kpi-delta flat">฿ THB</div></div>
-    <div class="kpi-card"><div class="kpi-label">฿/sqm est.</div><div class="kpi-value" style="font-size:16px">${p.psm>0?Math.round(p.psm/1000)+'k':'—'}</div><div class="kpi-delta flat">median</div></div>
-    <div class="kpi-card"><div class="kpi-label">Size range</div><div class="kpi-value" style="font-size:14px">${p.minSize>0?p.minSize+'–'+p.maxSize:'—'}</div><div class="kpi-delta flat">sqm</div></div>
+    <div class="kpi-card"><div class="kpi-label">฿/sqm est.</div><div class="kpi-value" style="font-size:16px">${p.psm>0?Math.round(p.psm/1000)+'k':'—'}</div><div class="kpi-delta flat">min price / min size</div></div>
+    <div class="kpi-card"><div class="kpi-label">Size range</div><div class="kpi-value" style="font-size:14px">${p.minSize>0?p.minSize+'–'+p.maxSize+' sqm':'—'}</div><div class="kpi-delta flat">sqm</div></div>
     <div class="kpi-card blue"><div class="kpi-label">DQS</div><div class="kpi-value">${p.dqs}</div><div class="kpi-delta flat">${p.dqs>=80?'Full':'Working'}</div></div>
   </div>
-  ${hasHistory?`<div class="chart-row cols-2" style="margin-bottom:18px"><div class="chart-card"><div class="chart-card-title">฿/sqm Price History</div><div class="chart-card-sub">Median ฿/sqm over snapshots</div><canvas id="pp-priceLine" style="max-height:190px"></canvas></div><div class="chart-card"><div class="chart-card-title">Inventory Depletion</div><div class="chart-card-sub">Available vs Sold over time</div><canvas id="pp-inventory" style="max-height:190px"></canvas></div></div>`:'<div class="rule-box" style="margin-bottom:18px;color:var(--muted)">📊 Charts will appear after first A3 agent snapshot cycle</div>'}
+  ${hasHistory?`<div class="chart-row cols-2" style="margin-bottom:18px"><div class="chart-card"><div class="chart-card-title">฿/sqm Price History</div><div class="chart-card-sub">Median ฿/sqm over snapshots</div><canvas id="pp-priceLine" style="max-height:190px"></canvas></div><div class="chart-card"><div class="chart-card-title">Inventory Depletion</div><div class="chart-card-sub">Available vs Sold over time</div><canvas id="pp-inventory" style="max-height:190px"></canvas></div></div>`:'<div class="rule-box" style="margin-bottom:18px;color:var(--muted)">📊 Charts appear after first A3 agent snapshot cycle</div>'}
+  <div class="chart-row cols-2" style="margin-bottom:18px"><div class="chart-card"><div class="chart-card-title">฿/sqm Price History</div><div class="chart-card-sub">Median ฿/sqm · ${p.monthsSelling} months</div><canvas id="pp-priceLine" style="max-height:190px"></canvas></div><div class="chart-card"><div class="chart-card-title">Inventory Depletion</div><div class="chart-card-sub">Available vs Sold over time</div><canvas id="pp-inventory" style="max-height:190px"></canvas></div></div>
   <div class="section-label" style="margin-bottom:10px">Block C — Snapshot History</div>
-  ${hasHistory?`<table class="data-table" style="margin-bottom:18px"><thead><tr><th>Date</th><th>Available / Total</th><th>Avail %</th><th>Sold</th><th>Sold %</th><th>Median ฿/sqm</th><th>Δ vs Prev</th><th>Δ %</th><th>Segment</th></tr></thead><tbody>${p.snaps.map((s,i)=>`<tr><td class="mono">${s}</td><td class="mono">${p.availHistory[i]} / ${p.units}</td><td class="mono" style="color:var(--muted)">${Math.round(p.availHistory[i]/p.units*100)}%</td><td class="mono">${p.soldHistory[i]}</td><td class="mono" style="color:#4ADE80">${Math.round(p.soldHistory[i]/p.units*100)}%</td><td class="mono">${p.psmHistory[i].toLocaleString()}</td><td class="mono ${i>0?'text-up':''}">${i>0?'+'+(p.psmHistory[i]-p.psmHistory[i-1]).toLocaleString():'— first'}</td><td class="mono" style="color:${i>0?'#4ADE80':'var(--muted)'}">${i>0?'+'+(((p.psmHistory[i]-p.psmHistory[i-1])/p.psmHistory[i-1])*100).toFixed(1)+'%':'—'}</td><td><span style="font-size:8px;padding:2px 6px;border-radius:3px;background:${sColor}22;color:${sColor}">${p.segment}</span></td></tr>`).join('')}</tbody></table>`:`<div class="rule-box" style="margin-bottom:18px;color:var(--muted)">No snapshot history yet — A3 agent will populate this table after first monitoring cycle</div>`}
+  ${hasHistory?`<table class="data-table" style="margin-bottom:18px"><thead><tr><th>Date</th><th>Available / Total</th><th>Avail %</th><th>Sold</th><th>Sold %</th><th>Median ฿/sqm</th><th>Δ vs Prev</th><th>Δ %</th><th>Segment</th></tr></thead><tbody>${p.snaps.map((s,i)=>\`<tr><td class="mono">${s}</td><td class="mono">${p.availHistory[i]} / ${p.units}</td><td class="mono" style="color:var(--muted)">${Math.round(p.availHistory[i]/p.units*100)}%</td><td class="mono">${p.soldHistory[i]}</td><td class="mono" style="color:#4ADE80">${Math.round(p.soldHistory[i]/p.units*100)}%</td><td class="mono">${p.psmHistory[i].toLocaleString()}</td><td class="mono ${i>0?'text-up':''}">${i>0?'+'+(p.psmHistory[i]-p.psmHistory[i-1]).toLocaleString():'— first'}</td><td class="mono" style="color:${i>0?'#4ADE80':'var(--muted)'}">${i>0?'+'+(((p.psmHistory[i]-p.psmHistory[i-1])/p.psmHistory[i-1])*100).toFixed(1)+'%':'—'}</td><td><span style="font-size:8px;padding:2px 6px;border-radius:3px;background:${sColor}22;color:${sColor}">${p.segment}</span></td></tr>\`).join('')}</tbody></table>`:'<div class="rule-box" style="margin-bottom:18px;color:var(--muted)">No snapshot history yet — A3 agent will populate this after first monitoring cycle</div>'}
   <div class="anomaly-item good" style="margin-bottom:18px"><div class="anomaly-icon">🤖</div><div class="anomaly-text good"><strong>A4 Auto-Insight</strong> ${p.insight}</div></div>
   <div class="section-label" style="margin-bottom:10px">Available Units (${p.available})</div>
   <table class="data-table" style="margin-bottom:18px"><thead><tr><th>Unit ref</th><th>Type</th><th>Floor</th><th>Area sqm</th><th>View</th><th>Ownership</th><th>Price (฿)</th><th>฿/sqm</th><th>Flags</th></tr></thead><tbody>${unitsHtml}<tr><td colspan="9" class="text-muted small" style="text-align:center;padding:10px">… ${Math.max(0,p.available-p.units_sample.length)} more units · full list in PDF passport</td></tr></tbody></table>
@@ -1222,10 +1241,10 @@ function ppLoadProject(){
   <div class="rule-box"><strong>Score thresholds:</strong> 80–100 → Full passport · 60–79 → Working, minor gaps · 40–59 → Incomplete · 0–39 → Stub only</div>
 </div>`;
   if(hasHistory){
-    setTimeout(()=>{
-      ppCharts.price=new Chart(document.getElementById('pp-priceLine'),{type:'line',data:{labels:p.snaps,datasets:[{label:'Median ฿/sqm',data:p.psmHistory,borderColor:gold,backgroundColor:'rgba(255,133,0,0.06)',fill:true,tension:0.35,borderWidth:2,pointRadius:4,pointBackgroundColor:gold}]},options:{...BASE,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){const first=p.psmHistory[0];const pct=((ctx.parsed.y-first)/first*100).toFixed(1);const sign=pct>=0?'+':'';return ' ฿/sqm: '+ctx.parsed.y.toLocaleString()+' ('+sign+pct+'% vs launch)';}}}},scales:{x:{grid:GRID,ticks:TICK},y:{grid:GRID,ticks:{...TICK,callback:v=>(v/1000)+'k'}}}}});
-      ppCharts.inv=new Chart(document.getElementById('pp-inventory'),{type:'line',data:{labels:p.snaps,datasets:[{label:'Available',data:p.availHistory,borderColor:'#5BA3C9',backgroundColor:'rgba(91,163,201,0.07)',fill:true,tension:0.35,borderWidth:2,pointRadius:4,pointBackgroundColor:'#5BA3C9'},{label:'Sold',data:p.soldHistory,borderColor:segC.mid,backgroundColor:'rgba(224,112,0,0.07)',fill:true,tension:0.35,borderWidth:2,pointRadius:4,pointBackgroundColor:segC.mid}]},options:{...BASE,plugins:{...BASE.plugins,tooltip:{callbacks:{label:function(ctx){const pct=Math.round(ctx.parsed.y/p.units*100);return ' '+ctx.dataset.label+': '+ctx.parsed.y+' units ('+pct+'%)';}}}},scales:{x:{grid:GRID,ticks:TICK},y:{grid:GRID,ticks:{...TICK,callback:function(v){return v+' ('+Math.round(v/p.units*100)+'%)';}}}}}});
-    },50);
+  setTimeout(()=>{
+    ppCharts.price=new Chart(document.getElementById('pp-priceLine'),{type:'line',data:{labels:p.snaps,datasets:[{label:'Median ฿/sqm',data:p.psmHistory,borderColor:gold,backgroundColor:'rgba(255,133,0,0.06)',fill:true,tension:0.35,borderWidth:2,pointRadius:4,pointBackgroundColor:gold}]},options:{...BASE,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){const first=p.psmHistory[0];const pct=((ctx.parsed.y-first)/first*100).toFixed(1);const sign=pct>=0?'+':'';return ' ฿/sqm: '+ctx.parsed.y.toLocaleString()+' ('+sign+pct+'% vs launch)';}}}},scales:{x:{grid:GRID,ticks:TICK},y:{grid:GRID,ticks:{...TICK,callback:v=>(v/1000)+'k'}}}}});
+    ppCharts.inv=new Chart(document.getElementById('pp-inventory'),{type:'line',data:{labels:p.snaps,datasets:[{label:'Available',data:p.availHistory,borderColor:'#5BA3C9',backgroundColor:'rgba(91,163,201,0.07)',fill:true,tension:0.35,borderWidth:2,pointRadius:4,pointBackgroundColor:'#5BA3C9'},{label:'Sold',data:p.soldHistory,borderColor:segC.mid,backgroundColor:'rgba(224,112,0,0.07)',fill:true,tension:0.35,borderWidth:2,pointRadius:4,pointBackgroundColor:segC.mid}]},options:{...BASE,plugins:{...BASE.plugins,tooltip:{callbacks:{label:function(ctx){const pct=Math.round(ctx.parsed.y/p.units*100);return ' '+ctx.dataset.label+': '+ctx.parsed.y+' units ('+pct+'%)';}}}},scales:{x:{grid:GRID,ticks:TICK},y:{grid:GRID,ticks:{...TICK,callback:function(v){return v+' ('+Math.round(v/p.units*100)+'%)';}}}}}});
+  },50);
   }
 }
 </script>
